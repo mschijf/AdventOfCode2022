@@ -11,12 +11,9 @@ class MainProgram {
         val fileName = getFileName(test)
         val input = Input(fileName)
         val baseClass = input.getBaseClass()
-        val output = run()
+        //val output = baseClass.maxCalories()
+        val output = baseClass.topThreeCalories()
         println("Puzzle output : $output")
-    }
-
-    fun run(): Long {
-        return 0
     }
 
     //------------------------------------------------------------------------------------------------------------------

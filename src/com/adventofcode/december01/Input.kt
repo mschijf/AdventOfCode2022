@@ -1,8 +1,6 @@
 package com.adventofcode.december01
 
-import java.io.BufferedReader
-import java.io.FileInputStream
-import java.io.InputStreamReader
+import java.io.File
 
 class Input(fileName: String) {
 
@@ -21,17 +19,6 @@ class Input(fileName: String) {
     //-----------------------------------------------------------------------------------------------------------
 
     private fun readFile(fileName: String): List<String> {
-        val lineCount = 0
-        val inputList: MutableList<String> = ArrayList()
-        try {
-            val fis = FileInputStream(fileName)
-            val br = BufferedReader(InputStreamReader(fis))
-            var line: String
-            while (br.readLine().also { line = it } != null) {
-                inputList.add(line)
-            }
-        } catch (e: Exception) {
-        }
-        return inputList
+        return File(fileName).bufferedReader().readLines()
     }
 }
