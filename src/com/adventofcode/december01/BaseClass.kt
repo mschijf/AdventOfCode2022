@@ -1,31 +1,24 @@
 package com.adventofcode.december01
 
-class BaseClass(inputLineList: List<String>) {
+import com.adventofcode.mylambdas.splitByCondition
 
-    private var calorieList = mutableListOf<List<Int>>()
-    init {
-        var tmp = mutableListOf<Int>()
-        inputLineList.forEach {
-            if (it.isBlank()) {
-                calorieList.add(tmp)
-                tmp = mutableListOf<Int>()
-            } else {
-                tmp.add(it.toInt())
-            }
-        }
-    }
+class BaseClass(private val inputLineList: List<String>) {
 
     fun maxCalories(): Int {
-        return calorieList
-            .map { it.sum() }
+        return inputLineList
+            .splitByCondition { it.isBlank() }
+            .map {it.sumOf { it.toInt() }}
             .max()
     }
 
     fun topThreeCalories(): Int {
-        return calorieList
-            .map { it.sum() }
+        return inputLineList
+            .splitByCondition { it.isBlank() }
+            .map {it.sumOf { it.toInt() }}
             .sortedDescending()
-            .subList(0, 3)
+            .take(3)
             .sum()
     }
 }
+
+
