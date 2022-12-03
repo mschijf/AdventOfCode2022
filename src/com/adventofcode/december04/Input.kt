@@ -1,4 +1,4 @@
-package com.adventofcode.december02
+package com.adventofcode.december04
 
 import java.io.File
 

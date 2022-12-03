@@ -1,6 +1,6 @@
 package com.adventofcode.december02
 
-class BaseClass(private val input: Input) {
+class PuzzleSolution(private val input: Input) {
 
     private val letter1ToTool = mapOf('A' to Tool.ROCK, 'B' to Tool.PAPER, 'C' to Tool.SCISSORS)
     private val letter2ToTool = mapOf('X' to Tool.ROCK, 'Y' to Tool.PAPER, 'Z' to Tool.SCISSORS)
@@ -42,7 +42,7 @@ class BaseClass(private val input: Input) {
         }
     }
 
-    fun totalScore(): Int {
+    fun resultPartOne(): Int {
         return input.inputLines
             .map{Pair(it[0], it[2])}
             .map{Pair(letter1ToTool[it.first]!!, letter2ToTool[it.second]!! )}
@@ -50,7 +50,7 @@ class BaseClass(private val input: Input) {
             .sum()
     }
 
-    fun totalScore2(): Int {
+    fun resultPartTwo(): Int {
         return input.inputLines
             .map{Pair(it[0], it[2])}
             .map{Pair(letter1ToTool[it.first]!!, letter2ToResult[it.second]!! )}

@@ -1,13 +1,13 @@
 package com.adventofcode.december01
 
 fun main() {
-    MainProgram().MainProgram()
+    MainProgram().mainProgram()
 }
 
 class MainProgram {
     private val test = false
 
-    fun MainProgram() {
+    fun mainProgram() {
         val fileName = getFileName(test)
         val input = Input(fileName)
         val baseClass = input.getBaseClass()
