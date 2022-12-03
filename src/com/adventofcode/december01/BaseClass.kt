@@ -13,7 +13,7 @@ class BaseClass(private val inputLineList: List<String>) {
 
     fun topThreeCalories(): Int {
         return inputLineList
-            .splitByCondition { it.isBlank() }
+            .splitByCondition { it.isBlank()}
             .map {it.sumOf { it.toInt() }}
             .sortedDescending()
             .take(3)
