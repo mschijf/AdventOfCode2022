@@ -11,14 +11,10 @@ class BaseClass(private val input: Input) {
     }
 
     fun totalScore2(): Int {
-        val tripleList = mutableListOf<Triple<String, String, String>>()
-        for (i in 3..input.inputLines.size step 3) {
-            tripleList.add(Triple(input.inputLines[i-3], input.inputLines[i-2], input.inputLines[i-1]))
-        }
-        return tripleList
-            .map{appearsInBoth(appearsInBoth(it.first, it.second), it.third)}
-            .map{toValue(it)}
-            .sum()
+        return input.inputLines
+            .chunked(3)
+            .map { appearsInBoth(appearsInBoth(it[0], it[1]), it[2]) }
+            .sumOf { toValue(it) }
     }
 
     private fun appearsInBoth(first: String, second: String): String {
