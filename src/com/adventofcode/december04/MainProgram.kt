@@ -1,25 +1,17 @@
 package com.adventofcode.december04
 
-import com.adventofcode.general.Input
-import com.adventofcode.general.getDayOfMonthFromClassName
-
 fun main() {
-    MainProgram().run()
-}
+    val puzzleSolution = PuzzleSolution()
 
-class MainProgram {
-    private val test = false
+    val output1 = puzzleSolution.resultPartOne()
+    val output2 = puzzleSolution.resultPartTwo()
 
-    fun run() {
-        val dayOfMonth = getDayOfMonthFromClassName(this)
-        val input = Input(test, dayOfMonth)
-
-        val puzzleSolution = PuzzleSolution(input)
-        val output1 = puzzleSolution.resultPartOne()
-        val output2 = puzzleSolution.resultPartTwo()
-
-        println("December $dayOfMonth") //todo TEST afdrukkken
-        println("  Puzzle output part 1: $output1")
-        println("  Puzzle output part 2: $output2")
-    }
+    println("Day          : ${puzzleSolution.getDayOfMonth()}")
+    print("Version      : ")
+    if (puzzleSolution.getIsTestRun()) println("test input!!!") else println("real input")
+    print("Input lines  : ${puzzleSolution.getInputLineCount()}")
+    if (puzzleSolution.getInputLineCount() == 0) println("  POSSIBLE ERROR!! ") else println()
+    println("---------------------------------")
+    println("Result part 1: $output1")
+    println("Result part 2: $output2")
 }

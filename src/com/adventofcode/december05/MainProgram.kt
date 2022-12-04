@@ -1,4 +1,4 @@
-package com.adventofcode.december03
+package com.adventofcode.december05
 
 fun main() {
     val puzzleSolution = PuzzleSolution()

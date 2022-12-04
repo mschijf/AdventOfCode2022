@@ -1,8 +1,13 @@
 package com.adventofcode.december02
 
 import com.adventofcode.general.Input
+import com.adventofcode.general.getDayOfMonthFromClassName
 
-class PuzzleSolution(private val input: Input) {
+class PuzzleSolution {
+    fun getIsTestRun() = false
+    fun getDayOfMonth() = getDayOfMonthFromClassName(this)
+    fun getInputLineCount() = input.inputLines.count()
+    private val input = Input(getIsTestRun(), getDayOfMonth())
 
     private val letter1ToTool = mapOf('A' to Tool.ROCK, 'B' to Tool.PAPER, 'C' to Tool.SCISSORS)
     private val letter2ToTool = mapOf('X' to Tool.ROCK, 'Y' to Tool.PAPER, 'Z' to Tool.SCISSORS)

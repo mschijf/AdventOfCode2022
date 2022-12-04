@@ -1,8 +1,13 @@
 package com.adventofcode.december04
 
 import com.adventofcode.general.Input
+import com.adventofcode.general.getDayOfMonthFromClassName
 
-class PuzzleSolution(private val input: Input) {
+class PuzzleSolution {
+    fun getIsTestRun() = false
+    fun getDayOfMonth() = getDayOfMonthFromClassName(this)
+    fun getInputLineCount() = input.inputLines.count()
+    private val input = Input(getIsTestRun(), getDayOfMonth())
 
     fun resultPartOne(): Int {
         return input.inputLines
