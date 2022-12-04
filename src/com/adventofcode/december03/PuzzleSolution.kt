@@ -1,5 +1,7 @@
 package com.adventofcode.december03
 
+import com.adventofcode.general.Input
+
 class PuzzleSolution(private val input: Input) {
 
     fun resultPartOne(): Int {

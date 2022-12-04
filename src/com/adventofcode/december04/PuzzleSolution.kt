@@ -1,5 +1,7 @@
 package com.adventofcode.december04
 
+import com.adventofcode.general.Input
+
 class PuzzleSolution(private val input: Input) {
 
     fun resultPartOne(): Int {
@@ -27,7 +29,7 @@ class SectionPair(
     fun hasOverlap() = first.hasOverlapWith(second)
 }
 
-class Section(val input:String) { //"2-3"
+class Section(input:String) { //"2-3"
     private val splitInput = input.split("-")
     val begin: Int = splitInput[0].toInt()
     val end: Int = splitInput[1].toInt()

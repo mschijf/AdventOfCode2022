@@ -1,5 +1,6 @@
 package com.adventofcode.december01
 
+import com.adventofcode.general.Input
 import com.adventofcode.mylambdas.splitByCondition
 
 class PuzzleSolution(private val input: Input) {

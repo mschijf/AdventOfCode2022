@@ -1,5 +1,7 @@
 package com.adventofcode.december02
 
+import com.adventofcode.general.Input
+
 class PuzzleSolution(private val input: Input) {
 
     private val letter1ToTool = mapOf('A' to Tool.ROCK, 'B' to Tool.PAPER, 'C' to Tool.SCISSORS)
