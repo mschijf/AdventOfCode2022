@@ -13,8 +13,7 @@ class PuzzleSolution {
     fun resultPartOne(): Int {
         return input.inputLines
             .splitByCondition { it.isBlank() }
-            .map {it.sumOf { it.toInt() }}
-            .max()
+            .maxOf { it -> it.sumOf { it.toInt() }}
     }
 
     fun resultPartTwo(): Int {
