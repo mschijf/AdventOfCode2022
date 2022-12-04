@@ -1,6 +1,6 @@
 package com.adventofcode.december01
 
-import com.adventofcode.general.PuzzleSolverAbstract
+import com.adventofcode.PuzzleSolverAbstract
 import com.adventofcode.mylambdas.splitByCondition
 
 fun main() {

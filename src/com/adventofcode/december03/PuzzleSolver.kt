@@ -1,6 +1,6 @@
 package com.adventofcode.december03
 
-import com.adventofcode.general.PuzzleSolverAbstract
+import com.adventofcode.PuzzleSolverAbstract
 
 fun main() {
     PuzzleSolver(test=false).showResult()
