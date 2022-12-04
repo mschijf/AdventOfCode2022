@@ -1,13 +1,13 @@
 package com.adventofcode.december02
 
-import com.adventofcode.general.Input
-import com.adventofcode.general.getDayOfMonthFromClassName
+import com.adventofcode.general.PuzzleSolverAbstract
 
-class PuzzleSolution {
-    fun getIsTestRun() = false
-    fun getDayOfMonth() = getDayOfMonthFromClassName(this)
-    fun getInputLineCount() = input.inputLines.count()
-    private val input = Input(getIsTestRun(), getDayOfMonth())
+fun main() {
+    PuzzleSolver().showResult()
+}
+
+class PuzzleSolver : PuzzleSolverAbstract() {
+    override fun getIsTestRun() = false
 
     private val letter1ToTool = mapOf('A' to Tool.ROCK, 'B' to Tool.PAPER, 'C' to Tool.SCISSORS)
     private val letter2ToTool = mapOf('X' to Tool.ROCK, 'Y' to Tool.PAPER, 'Z' to Tool.SCISSORS)
@@ -49,19 +49,21 @@ class PuzzleSolution {
         }
     }
 
-    fun resultPartOne(): Int {
+    override fun resultPartOne(): String {
         return input.inputLines
             .map { Pair(it[0], it[2]) }
             .map { Pair(letter1ToTool[it.first]!!, letter2ToTool[it.second]!!) }
             .sumOf { outCome(it).value + it.second.value }
+            .toString()
     }
 
-    fun resultPartTwo(): Int {
+    override fun resultPartTwo(): String {
         return input.inputLines
             .map { Pair(it[0], it[2]) }
             .map { Pair(letter1ToTool[it.first]!!, letter2ToResult[it.second]!!) }
             .map { Pair(it.first, findTool(it)) }
             .sumOf { outCome(it).value + it.second.value }
+            .toString()
     }
 }
 

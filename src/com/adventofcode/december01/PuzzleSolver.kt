@@ -1,28 +1,30 @@
 package com.adventofcode.december01
 
-import com.adventofcode.general.Input
-import com.adventofcode.general.getDayOfMonthFromClassName
+import com.adventofcode.general.PuzzleSolverAbstract
 import com.adventofcode.mylambdas.splitByCondition
 
-class PuzzleSolution {
-    fun getIsTestRun() = false
-    fun getDayOfMonth() = getDayOfMonthFromClassName(this)
-    fun getInputLineCount() = input.inputLines.count()
-    private val input = Input(getIsTestRun(), getDayOfMonth())
+fun main() {
+    PuzzleSolver().showResult()
+}
 
-    fun resultPartOne(): Int {
+class PuzzleSolver : PuzzleSolverAbstract() {
+    override fun getIsTestRun() = false
+
+    override fun resultPartOne(): String {
         return input.inputLines
             .splitByCondition { it.isBlank() }
             .maxOf { it -> it.sumOf { it.toInt() }}
+            .toString()
     }
 
-    fun resultPartTwo(): Int {
+    override fun resultPartTwo(): String {
         return input.inputLines
             .splitByCondition { it.isBlank()}
             .map { it -> it.sumOf { it.toInt() }}
             .sortedDescending()
             .take(3)
             .sum()
+            .toString()
     }
 }
 

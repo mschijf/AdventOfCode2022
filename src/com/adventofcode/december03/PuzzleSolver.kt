@@ -1,26 +1,28 @@
 package com.adventofcode.december03
 
-import com.adventofcode.general.Input
-import com.adventofcode.general.getDayOfMonthFromClassName
+import com.adventofcode.general.PuzzleSolverAbstract
 
-class PuzzleSolution {
-    fun getIsTestRun() = false
-    fun getDayOfMonth() = getDayOfMonthFromClassName(this)
-    fun getInputLineCount() = input.inputLines.count()
-    private val input = Input(getIsTestRun(), getDayOfMonth())
+fun main() {
+    PuzzleSolver().showResult()
+}
 
-    fun resultPartOne(): Int {
+class PuzzleSolver : PuzzleSolverAbstract() {
+    override fun getIsTestRun() = false
+
+    override fun resultPartOne(): String {
         return input.inputLines
             .map { Pair(it.substring(0, it.length / 2), it.substring(it.length / 2, it.length)) }
             .map { appearsInBoth(it.first, it.second) }
             .sumOf { toValue(it) }
+            .toString()
     }
 
-    fun resultPartTwo(): Int {
+    override fun resultPartTwo(): String {
         return input.inputLines
             .chunked(3)
             .map { appearsInBoth(appearsInBoth(it[0], it[1]), it[2]) }
             .sumOf { toValue(it) }
+            .toString()
     }
 
     private fun appearsInBoth(first: String, second: String): String {
