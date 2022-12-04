@@ -10,30 +10,29 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
 
     override fun resultPartOne(): String {
         return input.inputLines
-            .map { it -> it.split(",").map { Section(it) } }
-            .map { SectionPair(it[0], it[1]) }
+            .map { SectionPair(it) }
             .count { it.hasFullyOverlap() }
             .toString()
     }
 
     override fun resultPartTwo(): String {
         return input.inputLines
-            .map { it -> it.split(",").map { Section(it) } }
-            .map { SectionPair(it[0], it[1]) }
+            .map { SectionPair(it) }
             .count { it.hasOverlap() }
             .toString()
     }
 }
 
-class SectionPair(
-    private val first: Section,
-    private val second: Section) {
+class SectionPair(input: String) { //input: "2-3, 4-7", --> first: Section(2-3), second: Section(4-7)
+    private val splitInput = input.split(",")
+    private val first = Section(splitInput[0])
+    private val second = Section(splitInput[1])
 
     fun hasFullyOverlap() = first.fullyOverlappedBy(second) || second.fullyOverlappedBy(first)
     fun hasOverlap() = first.hasOverlapWith(second)
 }
 
-class Section(input:String) { //"2-3"
+class Section(input:String) { //input: "2-3" --> begin:2, end:3
     private val splitInput = input.split("-")
     private val begin: Int = splitInput[0].toInt()
     private val end: Int = splitInput[1].toInt()
