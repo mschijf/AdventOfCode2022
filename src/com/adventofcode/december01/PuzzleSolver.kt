@@ -4,11 +4,10 @@ import com.adventofcode.general.PuzzleSolverAbstract
 import com.adventofcode.mylambdas.splitByCondition
 
 fun main() {
-    PuzzleSolver().showResult()
+    PuzzleSolver(test=false).showResult()
 }
 
-class PuzzleSolver : PuzzleSolverAbstract() {
-    override fun getIsTestRun() = false
+class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
 
     override fun resultPartOne(): String {
         return input.inputLines

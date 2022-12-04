@@ -1,10 +1,9 @@
 package com.adventofcode.general
 
-abstract class PuzzleSolverAbstract {
-    abstract fun getIsTestRun(): Boolean
+abstract class PuzzleSolverAbstract (
+    private val test: Boolean){
     private val dayOfMonth = getDayOfMonthFromClassName(this)
-
-    protected val input = Input(getIsTestRun(), dayOfMonth)
+    protected val input = Input(test, dayOfMonth)
 
     open fun resultPartOne(): String = "NOT IMPLEMENTED"
     open fun resultPartTwo(): String = "NOT IMPLEMENTED"
@@ -15,7 +14,7 @@ abstract class PuzzleSolverAbstract {
 
         println("Day          : $dayOfMonth")
         print("Version      : ")
-        if (getIsTestRun()) println("test input!!!") else println("real input")
+        if (test) println("test input!!!") else println("real input")
         print("Input lines  : ${input.inputLines.count()}")
         if (input.inputLines.count() == 0) println("  POSSIBLE ERROR!! ") else println()
         println("---------------------------------")

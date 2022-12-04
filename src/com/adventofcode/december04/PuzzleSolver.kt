@@ -3,11 +3,10 @@ package com.adventofcode.december04
 import com.adventofcode.general.PuzzleSolverAbstract
 
 fun main() {
-    PuzzleSolver().showResult()
+    PuzzleSolver(test=false).showResult()
 }
 
-class PuzzleSolver : PuzzleSolverAbstract() {
-    override fun getIsTestRun() = true
+class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
 
     override fun resultPartOne(): String {
         return input.inputLines

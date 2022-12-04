@@ -3,11 +3,10 @@ package com.adventofcode.december02
 import com.adventofcode.general.PuzzleSolverAbstract
 
 fun main() {
-    PuzzleSolver().showResult()
+    PuzzleSolver(test=false).showResult()
 }
 
-class PuzzleSolver : PuzzleSolverAbstract() {
-    override fun getIsTestRun() = false
+class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
 
     private val letter1ToTool = mapOf('A' to Tool.ROCK, 'B' to Tool.PAPER, 'C' to Tool.SCISSORS)
     private val letter2ToTool = mapOf('X' to Tool.ROCK, 'Y' to Tool.PAPER, 'Z' to Tool.SCISSORS)
