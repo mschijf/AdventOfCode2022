@@ -10,7 +10,7 @@ abstract class PuzzleSolverAbstract (
 
     fun showResult() {
         println("Day          : $dayOfMonth")
-        println("Version      : ${if (test) "test" else "real"}  input")
+        println("Version      : ${if (test) "test" else "real"} input")
         println("Input lines  : ${if (input.inputLines.isEmpty()) "NO INPUT!!" else input.inputLines.count()} ")
         println("---------------------------------")
         println("Result part 1: ${resultPartOne()}")
