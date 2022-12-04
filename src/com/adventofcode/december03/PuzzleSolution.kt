@@ -1,8 +1,8 @@
 package com.adventofcode.december03
 
-class BaseClass(private val input: Input) {
+class PuzzleSolution(private val input: Input) {
 
-    fun totalScore(): Int {
+    fun resultPartOne(): Int {
         return input.inputLines
             .map{Pair(it.substring(0, it.length/2), it.substring(it.length/2, it.length))}
             .map{appearsInBoth(it.first, it.second)}
@@ -10,7 +10,7 @@ class BaseClass(private val input: Input) {
             .sum()
     }
 
-    fun totalScore2(): Int {
+    fun resultPartTwo(): Int {
         return input.inputLines
             .chunked(3)
             .map { appearsInBoth(appearsInBoth(it[0], it[1]), it[2]) }

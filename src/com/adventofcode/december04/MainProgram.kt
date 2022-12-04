@@ -1,7 +1,5 @@
 package com.adventofcode.december04
 
-import com.adventofcode.mylambdas.splitByCondition
-
 fun main() {
     MainProgram().run()
 }

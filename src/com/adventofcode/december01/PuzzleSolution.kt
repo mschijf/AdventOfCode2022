@@ -2,17 +2,17 @@ package com.adventofcode.december01
 
 import com.adventofcode.mylambdas.splitByCondition
 
-class BaseClass(private val inputLineList: List<String>) {
+class PuzzleSolution(private val input: Input) {
 
-    fun maxCalories(): Int {
-        return inputLineList
+    fun resultPartOne(): Int {
+        return input.inputLines
             .splitByCondition { it.isBlank() }
             .map {it.sumOf { it.toInt() }}
             .max()
     }
 
-    fun topThreeCalories(): Int {
-        return inputLineList
+    fun resultPartTwo(): Int {
+        return input.inputLines
             .splitByCondition { it.isBlank()}
             .map {it.sumOf { it.toInt() }}
             .sortedDescending()
