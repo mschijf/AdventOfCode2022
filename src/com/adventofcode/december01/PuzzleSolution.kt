@@ -20,7 +20,7 @@ class PuzzleSolution {
     fun resultPartTwo(): Int {
         return input.inputLines
             .splitByCondition { it.isBlank()}
-            .map {it.sumOf { it.toInt() }}
+            .map { it -> it.sumOf { it.toInt() }}
             .sortedDescending()
             .take(3)
             .sum()

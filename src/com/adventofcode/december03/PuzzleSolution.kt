@@ -11,10 +11,9 @@ class PuzzleSolution {
 
     fun resultPartOne(): Int {
         return input.inputLines
-            .map{Pair(it.substring(0, it.length/2), it.substring(it.length/2, it.length))}
-            .map{appearsInBoth(it.first, it.second)}
-            .map{toValue(it)}
-            .sum()
+            .map { Pair(it.substring(0, it.length / 2), it.substring(it.length / 2, it.length)) }
+            .map { appearsInBoth(it.first, it.second) }
+            .sumOf { toValue(it) }
     }
 
     fun resultPartTwo(): Int {
@@ -29,10 +28,10 @@ class PuzzleSolution {
     }
 
     private fun toValue (s: String) : Int {
-        if (s.lowercase() == s) {
-            return s[0] - 'a' + 1
+        return if (s.lowercase() == s) {
+            s[0] - 'a' + 1
         } else {
-            return s[0] - 'A' + 27
+            s[0] - 'A' + 27
         }
     }
 

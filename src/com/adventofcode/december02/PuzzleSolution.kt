@@ -51,19 +51,17 @@ class PuzzleSolution {
 
     fun resultPartOne(): Int {
         return input.inputLines
-            .map{Pair(it[0], it[2])}
-            .map{Pair(letter1ToTool[it.first]!!, letter2ToTool[it.second]!! )}
-            .map{outCome(it).value + it.second.value }
-            .sum()
+            .map { Pair(it[0], it[2]) }
+            .map { Pair(letter1ToTool[it.first]!!, letter2ToTool[it.second]!!) }
+            .sumOf { outCome(it).value + it.second.value }
     }
 
     fun resultPartTwo(): Int {
         return input.inputLines
-            .map{Pair(it[0], it[2])}
-            .map{Pair(letter1ToTool[it.first]!!, letter2ToResult[it.second]!! )}
-            .map{Pair(it.first, findTool(it) )}
-            .map{outCome(it).value + it.second.value }
-            .sum()
+            .map { Pair(it[0], it[2]) }
+            .map { Pair(letter1ToTool[it.first]!!, letter2ToResult[it.second]!!) }
+            .map { Pair(it.first, findTool(it)) }
+            .sumOf { outCome(it).value + it.second.value }
     }
 }
 
