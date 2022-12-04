@@ -13,39 +13,11 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
     private val letter2ToResult = mapOf('X' to Result.LOSS, 'Y' to Result.DRAW, 'Z' to Result.WIN)
 
     private fun outCome(pair: Pair<Tool, Tool>): Result {
-        return when (pair.second) {
-            Tool.ROCK -> when (pair.first) {
-                Tool.ROCK -> Result.DRAW
-                Tool.PAPER -> Result.LOSS
-                Tool.SCISSORS -> Result.WIN
-            }
-            Tool.PAPER -> when (pair.first) {
-                Tool.ROCK -> Result.WIN
-                Tool.PAPER -> Result.DRAW
-                Tool.SCISSORS -> Result.LOSS
-            }
-            Tool.SCISSORS -> when (pair.first) {
-                Tool.ROCK -> Result.LOSS
-                Tool.PAPER -> Result.WIN
-                Tool.SCISSORS -> Result.DRAW
-            }
-        }
+        return pair.second.played(pair.first)
     }
 
     private fun findTool (pair: Pair<Tool, Result>): Tool {
-        return when (pair.second) {
-            Result.LOSS -> when (pair.first) {
-                Tool.ROCK -> Tool.SCISSORS
-                Tool.PAPER -> Tool.ROCK
-                Tool.SCISSORS -> Tool.PAPER
-            }
-            Result.WIN -> when (pair.first) {
-                Tool.ROCK -> Tool.PAPER
-                Tool.PAPER -> Tool.SCISSORS
-                Tool.SCISSORS -> Tool.ROCK
-            }
-            Result.DRAW -> pair.first
-        }
+        return Tool.values().first{it.played(pair.first) == pair.second}
     }
 
     override fun resultPartOne(): String {
@@ -66,10 +38,19 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
     }
 }
 
-enum class Tool(val value: Int) {
-    ROCK(1),
-    PAPER(2),
-    SCISSORS(3)
+enum class Tool(val value: Int, private val playValue: Int) {
+    ROCK(1, 0),
+    PAPER(2, 1),
+    SCISSORS(3, 2);
+
+    fun played(other: Tool): Result {
+        return if (this == other)
+            Result.DRAW
+        else if ((this.playValue+2) % 3 == other.playValue)
+            Result.WIN
+        else
+            Result.LOSS
+    }
 }
 
 enum class Result(val value: Int) {
