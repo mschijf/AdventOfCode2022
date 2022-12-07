@@ -31,15 +31,12 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
                 "/" -> root
                 else -> current.oneDirDown(direction)
             }
-        } else if (cmd == "ls") {
-            //do nothing
-        } else { //impossible
-            //do nothing
         }
     }
 
     override fun resultPartOne(): String {
-        return root.getDirListWithSizeSmallerThan(100000)
+        return root.getAllDirsAsList()
+            .filter { it.getSize() <= 100000 }
             .sumOf { it.getSize() }
             .toString()
     }
@@ -48,9 +45,8 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
         val freeSpace = 70000000 - root.getSize()
         val spaceNeeded = 30000000 - freeSpace
         return root.getAllDirsAsList()
-            .filter{it.getSize() >= spaceNeeded}
-            .sortedBy { it.getSize() }
-            .first()
+            .filter { it.getSize() >= spaceNeeded }
+            .minByOrNull { it.getSize() }!!
             .getSize()
             .toString()
     }
@@ -84,7 +80,6 @@ class Dir(
 
     fun oneDirDown(dirName: String) = dirList[dirName]!!
 
-
     fun printTree(indent: Int = 0) {
         print(" ".repeat(indent))
         println(name)
@@ -95,20 +90,10 @@ class Dir(
         }
     }
 
-    fun getDirListWithSizeSmallerThan(maxSize: Int) : List<Dir> {
-        val result = mutableListOf<Dir>()
-        if (getSize() <= maxSize) {
-            result.add(this)
-        }
-        dirList.values.forEach { result.addAll(it.getDirListWithSizeSmallerThan(maxSize))}
-        return result
-    }
-
     fun getAllDirsAsList() : List<Dir> {
         val result = mutableListOf<Dir>()
         result.add(this)
         dirList.values.forEach { result.addAll(it.getAllDirsAsList())}
         return result
     }
-
 }
