@@ -20,7 +20,7 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
         return input.inputLines
             .first()
             .windowed(windowSize)
-            .indexOfFirst{allDifferent(it)}
+            .indexOfFirst{it.toList().distinct().size == it.length}
             .plus(windowSize)
     }
 
