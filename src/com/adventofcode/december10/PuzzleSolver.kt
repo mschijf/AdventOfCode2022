@@ -14,13 +14,13 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
         val requestedCycleNumbers = listOf(20, 60, 100, 140, 180, 220)
         input.inputLines
             .map{Command(it)}
-            .map{cmd -> List(cmd.cycleLength-1){Cycle(0)} + Cycle(cmd.adder)  }
+            .map{cmd -> List(cmd.cycleLength-1){0} + cmd.adder  }
             .flatten()
-            .forEachIndexed { cycleNumber, cycle ->
+            .forEachIndexed { cycleNumber, cycleAdder ->
                 if (cycleNumber+1 in requestedCycleNumbers) {
                     sum += (cycleNumber+1) * valueXregister
                 }
-                valueXregister += cycle.adder
+                valueXregister += cycleAdder
             }
         return sum.toString()
     }
@@ -29,11 +29,11 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
         var valueXregister = 1
         input.inputLines
             .map{Command(it)}
-            .map{cmd -> List(cmd.cycleLength-1){Cycle(0)} + Cycle(cmd.adder)  }
+            .map{cmd -> List(cmd.cycleLength-1){0} + cmd.adder  }
             .flatten()
-            .forEachIndexed { cycleNumber, cycle ->
+            .forEachIndexed { cycleNumber, cycleAdder ->
                 drawPixel(cycleNumber, valueXregister)
-                valueXregister += cycle.adder
+                valueXregister += cycleAdder
             }
         println()
         return "END"
@@ -58,5 +58,3 @@ class Command(cmd: String) {
     val cycleLength = if (cmd.startsWith("noop")) 1 else 2
     val adder = if (cmd.startsWith("addx")) cmd.substring("addx".length+1).toInt() else 0
 }
-
-data class Cycle(val adder: Int)

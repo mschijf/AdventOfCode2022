@@ -3,7 +3,7 @@ package com.adventofcode.december10
 import com.adventofcode.PuzzleSolverAbstract
 
 fun main() {
-    PuzzleSolverAlternative(test=true).showResult()
+    PuzzleSolverAlternative(test=false).showResult()
 }
 
 class PuzzleSolverAlternative(test: Boolean) : PuzzleSolverAbstract(test) {
@@ -13,9 +13,8 @@ class PuzzleSolverAlternative(test: Boolean) : PuzzleSolverAbstract(test) {
         return input.inputLines
             .asSequence()
             .map{Command(it)}
-            .map{cmd -> List(cmd.cycleLength-1){Cycle(0)} + Cycle(cmd.adder)  }
+            .map{cmd -> List(cmd.cycleLength-1){0} + cmd.adder  }
             .flatten()
-            .map{cycle -> cycle.adder}
             .runningReduce { sum, cycleAdder -> sum + cycleAdder }
             .map{ it + 1 }
             .withIndex()
@@ -28,11 +27,11 @@ class PuzzleSolverAlternative(test: Boolean) : PuzzleSolverAbstract(test) {
         var valueXregister = 1
         input.inputLines
             .map{Command(it)}
-            .map{cmd -> List(cmd.cycleLength-1){Cycle(0)} + Cycle(cmd.adder)  }
+            .map{cmd -> List(cmd.cycleLength-1){0} + cmd.adder  }
             .flatten()
-            .forEachIndexed { cycleNumber, cycle ->
+            .forEachIndexed { cycleNumber, cycleAdder ->
                 drawPixel(cycleNumber, valueXregister)
-                valueXregister += cycle.adder
+                valueXregister += cycleAdder
             }
         println()
         return "END"
