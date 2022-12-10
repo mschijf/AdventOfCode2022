@@ -4,6 +4,10 @@ import com.adventofcode.PuzzleSolverAbstract
 
 fun main() {
     PuzzleSolverAlternative(test=false).showResult()
+
+//    val x = listOf(1,2,3,4,5)
+//    println (x.runningReduce {  sum, cycleAdder -> sum + cycleAdder} )
+//    println (x.scan(3) {  sum, cycleAdder -> sum + cycleAdder} )
 }
 
 class PuzzleSolverAlternative(test: Boolean) : PuzzleSolverAbstract(test) {
@@ -15,31 +19,28 @@ class PuzzleSolverAlternative(test: Boolean) : PuzzleSolverAbstract(test) {
             .map{Command(it)}
             .map{cmd -> List(cmd.cycleLength-1){0} + cmd.adder  }
             .flatten()
-            .runningReduce { sum, cycleAdder -> sum + cycleAdder }
-            .map{ it + 1 }
+            .scan (1) { sum, cycleAdder -> sum + cycleAdder }
             .withIndex()
-            .filter { iv -> iv.index+2 in requestedCycleNumbers }
-            .sumOf { iv -> (iv.index+2) * iv.value }
+            .filter { iv -> iv.index+1 in requestedCycleNumbers }
+            .sumOf { iv -> (iv.index+1) * iv.value }
             .toString()
     }
 
     override fun resultPartTwo(): String {
-        var valueXregister = 1
         input.inputLines
+            .asSequence()
             .map{Command(it)}
             .map{cmd -> List(cmd.cycleLength-1){0} + cmd.adder  }
             .flatten()
-            .forEachIndexed { cycleNumber, cycleAdder ->
-                drawPixel(cycleNumber, valueXregister)
-                valueXregister += cycleAdder
-            }
+            .scan (1) { sum, cycleAdder -> sum + cycleAdder }
+            .forEachIndexed { cycleNumber, valueXregister -> drawPixel(cycleNumber, valueXregister) }
         println()
         return "END"
     }
 
     private fun drawPixel(cycleNumber: Int, valueXregister: Int) {
         val pixelPosition = cycleNumber % 40
-        if (pixelPosition % 40 == 0) {
+        if (pixelPosition == 0) {
             println()
         }
         if (pixelPosition in valueXregister - 1 .. valueXregister + 1) {

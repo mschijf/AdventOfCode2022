@@ -41,7 +41,7 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
 
     private fun drawPixel(cycleNumber: Int, valueXregister: Int) {
         val pixelPosition = cycleNumber % 40
-        if (pixelPosition % 40 == 0) {
+        if (pixelPosition == 0) {
             println()
         }
         if (pixelPosition in valueXregister - 1 .. valueXregister + 1) {
