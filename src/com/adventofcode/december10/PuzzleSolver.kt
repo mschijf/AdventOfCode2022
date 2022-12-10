@@ -32,19 +32,23 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
             .map{cmd -> List(cmd.cycleLength-1){Cycle(0)} + Cycle(cmd.adder)  }
             .flatten()
             .forEachIndexed { cycleNumber, cycle ->
-                val pixelPosition = cycleNumber % 40
-                if (pixelPosition % 40 == 0) {
-                    println()
-                }
-                if (pixelPosition in valueXregister - 1 .. valueXregister + 1) {
-                    print("#")
-                } else {
-                    print(".")
-                }
+                drawPixel(cycleNumber, valueXregister)
                 valueXregister += cycle.adder
             }
         println()
         return "END"
+    }
+
+    private fun drawPixel(cycleNumber: Int, valueXregister: Int) {
+        val pixelPosition = cycleNumber % 40
+        if (pixelPosition % 40 == 0) {
+            println()
+        }
+        if (pixelPosition in valueXregister - 1 .. valueXregister + 1) {
+            print("#")
+        } else {
+            print(".")
+        }
     }
 }
 
