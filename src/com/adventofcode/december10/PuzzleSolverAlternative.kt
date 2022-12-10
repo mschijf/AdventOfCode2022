@@ -4,10 +4,6 @@ import com.adventofcode.PuzzleSolverAbstract
 
 fun main() {
     PuzzleSolverAlternative(test=false).showResult()
-
-//    val x = listOf(1,2,3,4,5)
-//    println (x.runningReduce {  sum, cycleAdder -> sum + cycleAdder} )
-//    println (x.scan(3) {  sum, cycleAdder -> sum + cycleAdder} )
 }
 
 class PuzzleSolverAlternative(test: Boolean) : PuzzleSolverAbstract(test) {
@@ -44,9 +40,9 @@ class PuzzleSolverAlternative(test: Boolean) : PuzzleSolverAbstract(test) {
             println()
         }
         if (pixelPosition in valueXregister - 1 .. valueXregister + 1) {
-            print("#")
+            print("####")
         } else {
-            print(".")
+            print("    ")
         }
     }
 }
