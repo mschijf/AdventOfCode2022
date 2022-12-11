@@ -11,5 +11,6 @@ fun <T> Iterable<T>.splitByCondition(predicate: (T) -> Boolean): List<List<T>> {
             tmp.add(it)
         }
     }
+    result.add(tmp)
     return result
 }

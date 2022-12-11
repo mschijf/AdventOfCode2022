@@ -2,6 +2,7 @@ package com.adventofcode.december11
 
 import com.adventofcode.PuzzleSolverAbstract
 import com.adventofcode.mylambdas.splitByCondition
+import com.adventofcode.mylambdas.substringBetween
 
 fun main() {
     PuzzleSolver(test=false).showResult()
@@ -9,26 +10,17 @@ fun main() {
 
 class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
 
-
     override fun resultPartOne(): String {
-        val monkeyGroup = MonkeyGroup(input.inputLines, extraStress = false)
-        println("${monkeyGroup.dividerProduct}")
-        repeat(20) {
-            monkeyGroup.doRound()
-//            println()
-//            println ("After round ${it+1} ")
-//            monkeyGroup.print()
-        }
-        val activeMonkeyCount = monkeyGroup.monkeyList
-            .map {it.inspectionCount}
-            .sortedDescending()
-        return (activeMonkeyCount[0] * activeMonkeyCount[1]).toString()
+        return doSolve(repetitions = 20, extraStress = false).toString()
     }
 
     override fun resultPartTwo(): String {
-        val monkeyGroup = MonkeyGroup(input.inputLines, extraStress = true)
-        println("${monkeyGroup.dividerProduct}")
-        repeat(10000) {
+        return doSolve(repetitions = 10_000, extraStress = true).toString()
+    }
+
+    private fun doSolve(repetitions: Int, extraStress: Boolean): Long {
+        val monkeyGroup = MonkeyGroup(input.inputLines, extraStress = extraStress)
+        repeat(repetitions) {
             monkeyGroup.doRound()
 //            if ((it+1) % 1000 == 0 || it == 0 || it == 19) {
 //                println()
@@ -39,7 +31,7 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
         val activeMonkeyCount = monkeyGroup.monkeyList
             .map {it.inspectionCount}
             .sortedDescending()
-        return (activeMonkeyCount[0] * activeMonkeyCount[1]).toString()
+        return (activeMonkeyCount[0] * activeMonkeyCount[1])
     }
 }
 
@@ -50,7 +42,7 @@ class MonkeyGroup(inputLines: List<String>, extraStress: Boolean) {
             .splitByCondition {it.isBlank()}
             .map { Monkey(this, it, extraStress)}
 
-    val dividerProduct = monkeyList
+    val productOfDividableBys = monkeyList
         .map { it.divisibleBy }
         .reduce { acc, i ->  acc * i }
 
@@ -67,85 +59,47 @@ class MonkeyGroup(inputLines: List<String>, extraStress: Boolean) {
 
 class Monkey(private val monkeyGroup: MonkeyGroup, inputLines: List<String>, private val extraStress: Boolean) {
     private val monkeyNumber = inputLines[0]
-        .substringAfter("Monkey ")
-        .substringBefore(":")
-        .trim()
-        .toInt()
-
+        .substringBetween("Monkey ",":").trim().toInt()
     private val itemList = inputLines[1]
-        .substringAfter("Starting items: ")
-        .split(",")
-        .map{it.trim().toLong()}
-        .toMutableList()
-
-    private val operationIsMultiply = inputLines[2]
-        .substringAfter("Operation: new = old ")
-        .first() == '*'
-
-    private val secondOperandIsItem = inputLines[2]
-        .substringAfter("Operation: new = old ")
-        .substring("* ".length)
-        .trim() == "old"
-
-    private val secondOperandValue = inputLines[2]
-        .substringAfter("Operation: new = old ")
-        .substring("* ".length)
-        .trim()
-        .toLongOrNull() ?: 0L
-
+        .substringAfter("Starting items: ").split(",").map{it.trim().toLong()}.toMutableList()
+    private val operationChar = inputLines[2]
+        .substringAfter("Operation: new = old ").first()
+    private val secondOperandIsOld = inputLines[2]
+        .substringAfter("Operation: new = old ").substring("* ".length).trim() == "old"
+    private val secondOperandConstant = inputLines[2]
+        .substringAfter("Operation: new = old ").substring("* ".length).trim().toLongOrNull() ?: 0L
     val divisibleBy = inputLines[3]
-        .substringAfter("Test: divisible by ")
-        .trim()
-        .toLong()
-
+        .substringAfter("Test: divisible by ").trim().toLong()
     private val onTrueThrowToMonkey = inputLines[4]
-        .substringAfter("If true: throw to monkey ")
-        .trim()
-        .toInt()
+        .substringAfter("If true: throw to monkey ").trim().toInt()
     private val onFalseThrowToMonkey = inputLines[5]
-        .substringAfter("If false: throw to monkey ")
-        .trim()
-        .toInt()
+        .substringAfter("If false: throw to monkey ").trim().toInt()
 
     var inspectionCount = 0L
 
     fun doTurn() {
-        while (itemList.isNotEmpty()) {
-            inspectionCount++
-            var item = itemList.removeAt(0)
-            item = operation(item)
-            if (!extraStress) {
-                item /= 3
-            }
-            if (item % divisibleBy == 0L) {
-                monkeyGroup.getMonkey(onTrueThrowToMonkey).catchItem(item)
-            } else {
-                monkeyGroup.getMonkey(onFalseThrowToMonkey).catchItem(item)
-            }
+        itemList.forEach {old ->
+            val new = operation(old) / if (extraStress) 1 else 3
+            val monkey = monkeyGroup.getMonkey(if (new % divisibleBy == 0L) onTrueThrowToMonkey else onFalseThrowToMonkey)
+            monkey.catchItem(new)
         }
+        inspectionCount += itemList.size
+        itemList.clear()
     }
 
-    fun catchItem(item: Long) {
+    private fun catchItem(item: Long) {
         if (extraStress) {
-            itemList.add(item % monkeyGroup.dividerProduct)
+            itemList.add(item % monkeyGroup.productOfDividableBys)
         } else {
             itemList.add(item)
         }
     }
 
     private fun operation(item: Long): Long {
-        return if (secondOperandIsItem) {
-            if (operationIsMultiply) {
-                item * item
-            } else {
-                item + item
-            }
+        return if (operationChar == '*') {
+            item * if (secondOperandIsOld) item else secondOperandConstant
         } else {
-            if (operationIsMultiply) {
-                item * secondOperandValue
-            } else {
-                item + secondOperandValue
-            }
+            item + if (secondOperandIsOld) item else secondOperandConstant
         }
     }
 
