@@ -45,6 +45,7 @@ class MonkeyGroup(inputLines: List<String>, extraStress: Boolean) {
     val productOfDividableBys = inputLines
         .filter { it.contains("Test: divisible by ") }
         .map { it.substringAfter("Test: divisible by ").trim().toLong() }
+        .distinct()
         .reduce { acc, i ->  acc * i }
 
     fun getMonkey(monkeyNumber: Int) = monkeyList[monkeyNumber]
@@ -88,6 +89,17 @@ class Monkey(private val monkeyGroup: MonkeyGroup, inputLines: List<String>, pri
         itemList.clear()
     }
 
+    /**
+     * Use fact that (A + B) % divider = (A % divider + B % divider) % divider
+     *      and that (A * B) % divider = (A % divider * B % divider) % divider
+     *
+     * With that in mind, we can cut of each worryItem by a certain divider.
+     * To be sure that it goes for all operations, the divider should be the least common multiplicator (kleinset geme veelvoud)
+     * of all dividers used by the monkeys. Since they are all prime, it is the product of those.
+     *
+     * note: with a div operator (part oen of the puzzle) this doesn't work well,
+     *       therefore we skip this trick it for part 1 of the puzzle
+     */
     private fun catchItem(item: Long) {
         if (extraStress) {
             itemList.add(item % monkeyGroup.productOfDividableBys)
