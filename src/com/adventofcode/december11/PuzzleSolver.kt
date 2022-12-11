@@ -42,8 +42,9 @@ class MonkeyGroup(inputLines: List<String>, extraStress: Boolean) {
             .splitByCondition {it.isBlank()}
             .map { Monkey(this, it, extraStress)}
 
-    val productOfDividableBys = monkeyList
-        .map { it.divisibleBy }
+    val productOfDividableBys = inputLines
+        .filter { it.contains("Test: divisible by ") }
+        .map { it.substringAfter("Test: divisible by ").trim().toLong() }
         .reduce { acc, i ->  acc * i }
 
     fun getMonkey(monkeyNumber: Int) = monkeyList[monkeyNumber]
@@ -68,7 +69,7 @@ class Monkey(private val monkeyGroup: MonkeyGroup, inputLines: List<String>, pri
         .substringAfter("Operation: new = old ").substring("* ".length).trim() == "old"
     private val secondOperandConstant = inputLines[2]
         .substringAfter("Operation: new = old ").substring("* ".length).trim().toLongOrNull() ?: 0L
-    val divisibleBy = inputLines[3]
+    private val divisibleBy = inputLines[3]
         .substringAfter("Test: divisible by ").trim().toLong()
     private val onTrueThrowToMonkey = inputLines[4]
         .substringAfter("If true: throw to monkey ").trim().toInt()
@@ -80,8 +81,8 @@ class Monkey(private val monkeyGroup: MonkeyGroup, inputLines: List<String>, pri
     fun doTurn() {
         itemList.forEach {old ->
             val new = operation(old) / if (extraStress) 1 else 3
-            val monkey = monkeyGroup.getMonkey(if (new % divisibleBy == 0L) onTrueThrowToMonkey else onFalseThrowToMonkey)
-            monkey.catchItem(new)
+            val throwToMonkey = monkeyGroup.getMonkey(if (new % divisibleBy == 0L) onTrueThrowToMonkey else onFalseThrowToMonkey)
+            throwToMonkey.catchItem(new)
         }
         inspectionCount += itemList.size
         itemList.clear()
