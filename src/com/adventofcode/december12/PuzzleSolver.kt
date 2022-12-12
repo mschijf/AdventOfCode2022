@@ -9,93 +9,84 @@ fun main() {
 
 class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
 
-    val grid = input.inputLines.map{it.toList()}
-    val visited = List(grid.size) { row -> MutableList(grid[row].size) {0} }
+    private val grid = input.inputLines.map{it.toList()}
 
     override fun resultPartOne(): String {
-        val start = findPos('S')
-        val stepCount = doSolve(start)
-//        visited.forEach { it.forEachIndexed {  colIndex, cell -> it[colIndex] = 0 } }
-//        val stepQueue : Queue<Pos> = LinkedList<Pos>()
-//
-//        stepQueue.add(start)
-//        var stepCount = -1
-//        while (stepQueue.isNotEmpty()) {
-//            val current = stepQueue.remove()
-//            if (grid[current.row][current.col] == 'E') {
-//                stepCount = visited[current.row][current.col]
-//                break
-//            }
-//            if (isLegalStep(current, current.up())) {stepQueue.add(current.up()); visited[current.up().row][current.up().col] = visited[current.row][current.col]+1}
-//            if (isLegalStep(current, current.down())) {stepQueue.add(current.down()); visited[current.down().row][current.down().col] = visited[current.row][current.col]+1}
-//            if (isLegalStep(current, current.left())) {stepQueue.add(current.left()); visited[current.left().row][current.left().col] = visited[current.row][current.col]+1}
-//            if (isLegalStep(current, current.right())) {stepQueue.add(current.right()); visited[current.right().row][current.right().col] = visited[current.row][current.col]+1}
-//        }
+        val stepCount = doSolve(findStartPos())
         return stepCount.toString()
     }
 
     override fun resultPartTwo(): String {
-        val startPosList = grid
-            .mapIndexed{rowIndex, row -> row.mapIndexed {colIndex, col -> Pair(Pos(rowIndex, colIndex), col)}}
-            .flatten()
-            .filter {it.second == 'a' || it.second == 'S'}
-            .map {it.first}
-            .map{doSolve(it)}
-            .filter { it > 0}
+        return getStartPosList()
+            .map{startPos -> doSolve(startPos)}
+            .filter { stepCount -> stepCount > 0 }
             .min()
-
-        return startPosList.toString()
+            .toString()
     }
 
-    fun doSolve(startPos: Pos): Int {
-        visited.forEach { it.forEachIndexed {  colIndex, cell -> it[colIndex] = 0 } }
-        val stepQueue : Queue<Pos> = LinkedList<Pos>()
+    private fun doSolve(startPos: Pos): Int {
+        val visitedAfterStepsTaken = List(grid.size) { row -> MutableList(grid[row].size) {0} }
+        val stepQueue : Queue<Pos> = LinkedList()
         stepQueue.add(startPos)
-        var stepCount = -1
         while (stepQueue.isNotEmpty()) {
             val current = stepQueue.remove()
+            val stepsDone = visitedAfterStepsTaken[current.row][current.col]
             if (grid[current.row][current.col] == 'E') {
-                stepCount = visited[current.row][current.col]
-                break
+                return stepsDone
+            } else {
+                current
+                    .neighBoursInGrid(grid)
+                    .filter {neighbour -> isLegalStep(current, neighbour) && visitedAfterStepsTaken[neighbour.row][neighbour.col] <= 0}
+                    .forEach { neighbour ->
+                        stepQueue.add(neighbour)
+                        visitedAfterStepsTaken[neighbour.row][neighbour.col] = stepsDone + 1
+                    }
             }
-            if (isLegalStep(current, current.up())) {stepQueue.add(current.up()); visited[current.up().row][current.up().col] = visited[current.row][current.col]+1}
-            if (isLegalStep(current, current.down())) {stepQueue.add(current.down()); visited[current.down().row][current.down().col] = visited[current.row][current.col]+1}
-            if (isLegalStep(current, current.left())) {stepQueue.add(current.left()); visited[current.left().row][current.left().col] = visited[current.row][current.col]+1}
-            if (isLegalStep(current, current.right())) {stepQueue.add(current.right()); visited[current.right().row][current.right().col] = visited[current.row][current.col]+1}
         }
-        return stepCount
+        return -1
     }
 
-    fun findPos(letter: Char): Pos {
+    private fun findStartPos(): Pos {
         for (row in grid.indices)
             for (col in grid[row].indices)
-                if (grid[row][col] == letter)
+                if (grid[row][col] == 'S')
                     return Pos(row, col)
         return (Pos(0,0))
     }
 
-    fun isLegalStep(fromPos: Pos, toPos:Pos): Boolean {
-        if (toPos.row < 0 || toPos.row >= grid.size || toPos.col < 0 || toPos.col >= grid[toPos.row].size)
-            return false
-        if (visited[toPos.row][toPos.col] > 0)
-            return false
-        var fromLetter = grid[fromPos.row][fromPos.col]
-        var toLetter = grid[toPos.row][toPos.col]
-        if (fromLetter == 'S') fromLetter = 'a'
-        if (fromLetter == 'E') fromLetter = 'z'
-        if (toLetter == 'S') toLetter = 'a'
-        if (toLetter == 'E') toLetter = 'z'
-        if (toLetter - fromLetter > 1)
-            return false
-        return true
+    private fun getStartPosList(): List<Pos> {
+        return grid
+            .mapIndexed{ rowIndex, row -> row.mapIndexed { colIndex, col -> Pair(Pos(rowIndex, colIndex), col)}}
+            .flatten()
+            .filter {it.second == 'a' || it.second == 'S'}
+            .map {it.first}
     }
+
+    private fun isLegalStep(fromPos: Pos, toPos:Pos): Boolean {
+        return (letterValue(grid[toPos.row][toPos.col]) - letterValue(grid[fromPos.row][fromPos.col]) <= 1)
+    }
+
+    private fun letterValue(letter: Char) = (if (letter == 'S') 'a' else if (letter == 'E') 'z' else letter) - 'a'
+
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 class Pos(val row: Int, val col: Int) {
-    fun up() = Pos(row-1, col)
-    fun down() = Pos (row+1, col)
-    fun left() = Pos (row, col-1)
-    fun right() = Pos (row, col+1)
+
+    fun neighBoursInGrid(grid: List<List<Any>>): List<Pos> {
+        val result = mutableListOf<Pos>()
+        if (up().isOnGrid(grid)) result.add(up())
+        if (down().isOnGrid(grid)) result.add(down())
+        if (left().isOnGrid(grid)) result.add(left())
+        if (right().isOnGrid(grid)) result.add(right())
+        return result
+    }
+
+    private fun isOnGrid(grid: List<List<Any>>) = (row >= 0 && row < grid.size && col >= 0 && col < grid[row].size)
+
+    private fun up() = Pos(row-1, col)
+    private fun down() = Pos (row+1, col)
+    private fun left() = Pos (row, col-1)
+    private fun right() = Pos (row, col+1)
 }
