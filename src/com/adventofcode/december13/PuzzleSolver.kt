@@ -89,7 +89,7 @@ class NumberElement(val number: Int): Element {
     }
 }
 
-class ListElement(val aList: List<Element>): Element {
+class ListElement(private val aList: List<Element>): Element {
     override fun print() {
         print("[")
         aList.forEach {
@@ -100,7 +100,7 @@ class ListElement(val aList: List<Element>): Element {
 
     override fun compare(other: Element): Int {
         val compareOther = if (other is ListElement) other else ListElement(listOf(other))
-        aList.forEachIndexed() { index, elt ->
+        aList.forEachIndexed { index, elt ->
             if (index >= compareOther.aList.size) { //Right side ran out of items, so inputs are not in the right order
                 return 1
             }
@@ -111,10 +111,10 @@ class ListElement(val aList: List<Element>): Element {
                 return 1
             }
         }
-        if (this.aList.size < compareOther.aList.size) { //Left side ran out of items, so inputs are in the right order
-            return -1
+        return if (this.aList.size < compareOther.aList.size) { //Left side ran out of items, so inputs are in the right order
+            -1
         } else {
-            return 0
+            0
         }
     }
 }
@@ -129,7 +129,7 @@ class TreeNode(s0: String, s1: String) {
     }
 
     private fun makeList(s: String): List<Element> {
-        var result = mutableListOf<Element>()
+        val result = mutableListOf<Element>()
         var index = 0
         var numberStr = ""
         while (index < s.length) {
@@ -145,7 +145,7 @@ class TreeNode(s0: String, s1: String) {
                 result.add(ListElement(makeList(s.substring(index+1, endSubListIndex))))
                 index = endSubListIndex+1
             } else {
-                numberStr = numberStr + letter
+                numberStr += letter
                 index++
             }
         }
