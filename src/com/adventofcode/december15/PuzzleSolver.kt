@@ -11,34 +11,15 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
     private val yLine = if (test) 10 else 2000000
     private val maxXY = if (test) 20 else 4000000
 
+    private val sensorBeaconList = input.inputLines
+        .map{Pair(Pos(it.substringAfter("Sensor at ").substringBefore(":")), Pos(it.substringAfter("closest beacon is at ")))}
+
     override fun resultPartOne(): String {
 
-        val sensorBeaconList = input.inputLines
-            .map{Pair(Pos(it.substringAfter("Sensor at ").substringBefore(":")), Pos(it.substringAfter("closest beacon is at ")))}
-        val list = sensorBeaconList
-            .map{Pair(it.first, it.first.mcDistance(it.second))}
-            .map {Pair(it.first.x, it.second - (it.first.y - yLine).absoluteValue)}
-            .filter{ it.second >= 0 }
-            .map { Pair(it.first-it.second, it.first+it.second) } //-> make a xFrom and a xTo and store these, then find the overlap between them and filter that out
-            .sortedBy { it.first }
+        val rangeList = getRangeList(yLine)
+        val mergedRangeList = mergeRangeList(rangeList)
 
-        val result = mutableListOf<Pair<Int, Int>>()
-        var current = list[0]
-        for (i in 1 until list.size) {
-            if (list[i].first > current.second) { //2-8  en 9-10
-                result.add(current)
-                current = list[i]
-            } else if (list[i].second <= current.second) { //2-8 en 5-7
-                //doe niks, hou current en ignore list[i] en behandel de volgende
-            } else if (list[i].second > current.second) { //2-8 en 5-14
-                current = Pair(current.first, list[i].second)
-            } else {
-                println("ERRRORORR")
-            }
-        }
-        result.add(current)
-
-        val totalRange = result.sumOf { it.second - it.first + 1 }
+        val totalRange = mergedRangeList.sumOf { it.second - it.first + 1 }
 
         val beaconListForYline = sensorBeaconList
             .map{it.second}
@@ -48,7 +29,7 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
 
         var countBeaconsOnYLine = 0
         beaconListForYline.forEach {xValue ->
-            result.forEach { range ->
+            mergedRangeList.forEach { range ->
                 if (xValue >= range.first && xValue <= range.second) {
                     countBeaconsOnYLine++
                 }
@@ -60,43 +41,16 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
 
 
     override fun resultPartTwo(): String {
-        val sensorBeaconList = input.inputLines
-            .map{Pair(Pos(it.substringAfter("Sensor at ").substringBefore(":")), Pos(it.substringAfter("closest beacon is at ")))}
 
         repeat (maxXY+1) {yLineIndex ->
-            val list = sensorBeaconList
-                .map { Pair(it.first, it.first.mcDistance(it.second)) }
-                .map { Pair(it.first.x, it.second - (it.first.y - yLineIndex).absoluteValue) }
-                .filter { it.second >= 0 }
-                .map {
-                    Pair(
-                        it.first - it.second,
-                        it.first + it.second
-                    )
-                } //-> make a xFrom and a xTo and store these, then find the overlap between them and filter that out
-                .sortedBy { it.first }
+            val rangeList = getRangeList(yLineIndex)
+            val mergeRangeList = mergeRangeList(rangeList)
 
-            val result = mutableListOf<Pair<Int, Int>>()
-            var current = list[0]
-            for (i in 1 until list.size) {
-                if (list[i].first > current.second+1) { //2-8  en 10-11
-                    result.add(current)
-                    current = list[i]
-                } else if (list[i].second <= current.second) { //2-8 en 5-7
-                    //doe niks, hou current en ignore list[i] en behandel de volgende
-                } else if (list[i].second > current.second) { //2-8 en 5-14
-                    current = Pair(current.first, list[i].second)
-                } else {
-                    println("ERRRORORR")
-                }
-            }
-            result.add(current)
-
-            if (result.none { it.first <= 0 && it.second >= maxXY }) {
-                println("Op regel $yLineIndex: $result")
-                for (i in 1 until result.size) {
-                    if (result[i-1].second in 0 until maxXY && result[i-1].second+2 == result[i].first) {
-                        return (4000000L * (result[i-1].second+1) + yLineIndex).toString()
+            if (mergeRangeList.none { it.first <= 0 && it.second >= maxXY }) {
+                println("Op regel $yLineIndex: $mergeRangeList")
+                for (i in 1 until mergeRangeList.size) {
+                    if (mergeRangeList[i-1].second in 0 until maxXY && mergeRangeList[i-1].second+2 == mergeRangeList[i].first) {
+                        return (4000000L * (mergeRangeList[i-1].second+1) + yLineIndex).toString()
                     }
                 }
 
@@ -105,6 +59,35 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
         }
         return "NO SOLUTION FOUND"
     }
+
+    private fun getRangeList(yLine: Int): List<Pair<Int, Int>> {
+        return sensorBeaconList
+            .map{Pair(it.first, it.first.mcDistance(it.second))}
+            .map {Pair(it.first.x, it.second - (it.first.y - yLine).absoluteValue)}
+            .filter{ it.second >= 0 }
+            .map { Pair(it.first-it.second, it.first+it.second) } //-> make a xFrom and a xTo and store these, then find the overlap between them and filter that out
+            .sortedBy { it.first }
+    }
+
+    private fun mergeRangeList(rangeList: List<Pair<Int, Int>>): List<Pair<Int, Int>> {
+        val result = mutableListOf<Pair<Int, Int>>()
+        var current = rangeList[0]
+        for (i in 1 until rangeList.size) {
+            if (rangeList[i].first > current.second) { //2-8  en 9-10
+                result.add(current)
+                current = rangeList[i]
+            } else if (rangeList[i].second <= current.second) { //2-8 en 5-7
+                //doe niks, hou current en ignore list[i] en behandel de volgende
+            } else if (rangeList[i].second > current.second) { //2-8 en 5-14
+                current = Pair(current.first, rangeList[i].second)
+            } else {
+                println("ERRRORORR")
+            }
+        }
+        result.add(current)
+        return result
+    }
+
 }
 
 
