@@ -8,24 +8,24 @@ fun main() {
 }
 
 class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
-    val cubeList = input.inputLines
+    private val cubeList = input.inputLines
         .map {it.split(",")}
         .map{Cube(it[0].toInt(), it[1].toInt(), it[2].toInt())}
 
-    val directions = listOf(
+    private val directions = listOf(
         Cube(-1,0,0), Cube(1,0,0),
         Cube(0,-1,0), Cube(0,1,0),
         Cube(0,0,-1), Cube(0,0,1) )
 
-    val minX = cubeList.minOf { cube -> cube.x }
-    val maxX = cubeList.maxOf { cube -> cube.x }
-    val minY = cubeList.minOf { cube -> cube.y }
-    val maxY = cubeList.maxOf { cube -> cube.y }
-    val minZ = cubeList.minOf { cube -> cube.z }
-    val maxZ = cubeList.maxOf { cube -> cube.z }
+    private val minX = cubeList.minOf { cube -> cube.x }
+    private val maxX = cubeList.maxOf { cube -> cube.x }
+    private val minY = cubeList.minOf { cube -> cube.y }
+    private val maxY = cubeList.maxOf { cube -> cube.y }
+    private val minZ = cubeList.minOf { cube -> cube.z }
+    private val maxZ = cubeList.maxOf { cube -> cube.z }
 
-    var enclosedSet = mutableSetOf <Cube>()
-    var notEnclosedSet = mutableSetOf <Cube>()
+    private var enclosedSet = mutableSetOf <Cube>()
+    private var notEnclosedSet = mutableSetOf <Cube>()
 
     override fun resultPartOne(): String {
         var cubeConnectedSides = 0
@@ -41,7 +41,7 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
     }
 
     override fun resultPartTwo(): String {
-        val borders = makeBordersBigger()
+        val borders = determineOuterBorders()
         var countCubes = 0
         var cubeConnectedSides = 0
         for (cube in cubeList) {
@@ -59,8 +59,8 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
         return totalCubeSides.toString()
     }
 
-    private fun makeBordersBigger(): Set<Cube> {
-        var result = mutableSetOf<Cube>()
+    private fun determineOuterBorders(): Set<Cube> {
+        val result = mutableSetOf<Cube>()
         for (x in minX .. maxX) {
             for (y in minY..maxY) {
                 for (z in minZ..maxZ) {
@@ -137,24 +137,27 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
     private fun enclosed(cube: Cube, alreadyVisited: MutableSet<Cube>, level: Int, borders: Set<Cube>): Boolean {
         if (cube.x < minX || cube.x > maxX ||cube.y < minY || cube.y > maxY || cube.z < minZ || cube.z > maxZ)
             return false
+        if (cube in borders)
+            return false
+
 
         if (cube in enclosedSet)
             return true
         if (cube in notEnclosedSet)
             return false
 
-        if (cube in borders)
-            return false
 
         if (cube in cubeList)
             return true
 
+
         for (dir in directions) {
             val next = cube.plus(dir)
+
             if (!alreadyVisited.contains(next)) {
                 alreadyVisited.add(next)
                 if (!enclosed(next, alreadyVisited, level+1, borders)) {
-                    notEnclosedSet.add(cube)
+                    notEnclosedSet.add(next)
                     return false
                 }
             }
