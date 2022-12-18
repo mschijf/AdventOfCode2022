@@ -9,19 +9,12 @@ fun main() {
 
 class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
     private val valveList = input.inputLines.map{Valve(it)}
-    private val valveMap = valveList.associate {it.name to it}
-    private val startValve = valveMap["AA"]!!
+    private val startValve = valveList.find { valve -> valve.name == "AA" }!!
     private val valveListEssential = valveList.filter{it.rate > 0}
     private val distanceMap = makeDistanceMap()
 
     override fun resultPartOne(): String {
-//        valveList.forEach { it.print() }
-        val optimal = solver(
-            startValve,
-            valveListEssential.toSet(),
-            0,
-            30
-        )
+        val optimal = solver(startValve, valveListEssential.toSet(), 0, 30)
         return optimal.toString()
     }
 
@@ -56,16 +49,16 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
         }
 
         var maxValue = 0
-        for (valve in toBeVisited) {
+        for (nextValve in toBeVisited) {
             // om hier te komen heeft tijd gekost, namelijk distance in minutes
             // om de valve te openen, kost ook tijd: 1
-            val distanceInMinutes = distanceMap[previousValve.name]!![valve.name]!!
+            val distanceInMinutes = distanceMap[previousValve]!![nextValve]!!
             val totalMinutesPassed = minutesPassed + distanceInMinutes + 1
             if (totalMinutesPassed < maxSeconds) {
-                val pressureReleasedHere = (maxSeconds - totalMinutesPassed) * valve.rate
+                val pressureReleasedHere = (maxSeconds - totalMinutesPassed) * nextValve.rate
                 val totalPressureAfterHere = solver(
-                    valve,
-                    toBeVisited - valve,
+                    nextValve,
+                    toBeVisited - nextValve,
                     minutesPassed + distanceInMinutes + 1,
                     maxSeconds
                 )
@@ -77,12 +70,12 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
         return maxValue
     }
 
-    private fun makeDistanceMap(): Map<String, Map<String, Int>> {
-        val distanceMap = mutableMapOf<String, MutableMap<String, Int>>()
+    private fun makeDistanceMap(): Map<Valve, Map<Valve, Int>> {
+        val distanceMap = mutableMapOf<Valve, MutableMap<Valve, Int>>()
         valveListEssential.plus(startValve).forEach {fromValve ->
-            distanceMap[fromValve.name] = mutableMapOf()
+            distanceMap[fromValve] = mutableMapOf()
             valveListEssential.forEach {toValve ->
-                distanceMap[fromValve.name]!![toValve.name] = getShortestPathSteps(fromValve, toValve)
+                distanceMap[fromValve]!![toValve] = getShortestPathSteps(fromValve, toValve)
             }
         }
         return distanceMap
@@ -98,8 +91,8 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
             if (current == toValve)
                 return dMap[current.name]!!
 
-            current.neighbourValveList.forEach {
-                val nbValve = valveMap[it]!!
+            current.neighbourValveNameList.forEach {nbValveName ->
+                val nbValve = valveList.find { valve -> valve.name == nbValveName }!!
                 if (!dMap.contains(nbValve.name) ) {
                     dMap[nbValve.name] = dMap[current.name]!! + 1
                     queue.add(nbValve)
@@ -109,11 +102,11 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
         return 99999999
     }
 
-    private fun print(dMap: Map<String, Map<String, Int>>) {
-        dMap.keys.forEach {fromStr->
-            print("${valveMap[fromStr]!!.name} -->  ")
-            dMap[fromStr]!!.forEach { to ->
-                print(" ${valveMap[to.key]!!.name} ${dMap[fromStr]!![to.key]}")
+    private fun print(dMap: Map<Valve, Map<Valve, Int>>) {
+        dMap.keys.forEach {fromValve->
+            print("${fromValve.name} -->  ")
+            dMap[fromValve]!!.forEach { toValve ->
+                print(" ${toValve.key.name} ${dMap[fromValve]!![toValve.key]}")
             }
             println()
         }
@@ -124,14 +117,22 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class Valve(inputStr: String) { //Valve AA has flow rate=0; tunnels lead to valves DD, II, BB
-    val name: String = inputStr.substringAfter("Valve ").substringBefore("has flow rate").trim()
-    val rate: Int = inputStr.substringAfter("has flow rate=").substringBefore(";").trim().toInt()
-    val neighbourValveList : List<String> = inputStr.replace("valves", "valve")
-        .substringAfter(" to valve ").split(", ")
+class Valve(inputStr: String) { //inputStr = "Valve AA has flow rate=0; tunnels lead to valves DD, II, BB"
+    val name: String = inputStr
+        .substringAfter("Valve ")
+        .substringBefore("has flow rate")
+        .trim()
+    val rate: Int = inputStr
+        .substringAfter("has flow rate=")
+        .substringBefore(";")
+        .trim().toInt()
+
+    val neighbourValveNameList : List<String> = inputStr.replace("valves", "valve")
+        .substringAfter(" to valve ")
+        .split(", ")
 
     fun print() {
-        println("VALVE $name: rate: $rate , neighbours: $neighbourValveList")
+        println("VALVE $name: rate: $rate , neighbours: $neighbourValveNameList")
     }
 }
 
