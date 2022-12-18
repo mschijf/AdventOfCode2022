@@ -3,14 +3,17 @@ package com.adventofcode.december17
 import com.adventofcode.PuzzleSolverAbstract
 
 fun main() {
-    PuzzleSolver(test=true).showResult()
+    PuzzleSolver(test=false).showResult()
 }
 
 const val chamberWidth = 7
 const val leftEdgeRoom = 2
 const val bottomEdgeRoom = 3
 
+var countJetStreamTurns = 0L
+
 //val xxx = 1_000_000_000_000
+//val yyy = 1_514_285_714_288
 
 class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
     private val jetsStream = JetStream(input.inputLines[0])
@@ -19,14 +22,33 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
     override fun resultPartOne(): String {
         val rockPieces = mutableSetOf<Coordinate>()
 
-        repeat(2022) {
+        repeat(5000) {
             val rock = Rock(rockShape=rockShapeList.nextShape(), highestTop=(rockPieces.maxOfOrNull { it.y } ?: -1) + 1)
             rockRolling(rock, rockPieces)
             rockPieces.addAll(rock.coordinateList)
-//            removePiecesUnderALine
+
+            if (it % 5 == 4) { //5 gehad
+                println("${it+1} hoogte ${rockPieces.maxOf {  it.y } + 1}  jetStreamTurn $countJetStreamTurns")
+            }
         }
 
         return (rockPieces.maxOf {  it.y } + 1).toString()
+    }
+
+    override fun resultPartTwo(): String {
+        // Part two not programmed, but analysed with the help of excel.
+        // I run part one, and put output for each 5 rounds, and calculated the growth in heihjt for each of these 5 rounds.
+        // I found a pattern: after 35 rounds (example input), the change in heights was equal.
+        // I did the same for the real input, and - a liitle harder - could also found a pattern
+        //
+        // see excel file for more details
+        //
+        // It turned out that  think after a certain number of rounds, we have the same 'start' position, meaning:
+        // - same surface pattern,
+        // - same set of jetblows coming up and
+        // - same block is coming up
+        //
+        return "Solution via excel"
     }
 
     private fun rockRolling(rock: Rock, rockPieces: Set<Coordinate>) {
@@ -36,6 +58,8 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
             rock.pushByJet(jetsStream.nextDirection(), rockPieces)
         }
     }
+
+
 
 }
 
@@ -79,6 +103,7 @@ class Rock(rockShape: RockShape, highestTop: Int) {
     }
 
     fun pushByJet(dir: Direction, rockPieces: Set<Coordinate>) {
+        countJetStreamTurns++
         if (dir == Direction.LEFT) {
             if (canBePushedLeft(rockPieces)) {
                 coordinateList = coordinateList.map { c -> Coordinate(c.x - 1, c.y) }
