@@ -1,7 +1,6 @@
 package com.adventofcode.december21
 
 import com.adventofcode.PuzzleSolverAbstract
-import java.lang.String.format
 
 fun main() {
     PuzzleSolver(test=false).showResult()
@@ -15,13 +14,12 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
         return monkeyMap["root"]!!.yell().toString()
     }
 
-    //8967170973852742391 --> too high
     override fun resultPartTwo(): String {
         val monkeyMap = input.inputLines.map { Monkey(it) }.associate { it.name to it }
         monkeyMap.values.forEach { it.makeFunctional(monkeyMap) }
 
         monkeyMap["root"]!!.setOperator('-')
-        monkeyMap["humn"]!!.setNumber("x")
+        monkeyMap["humn"]!!.clearNumber()
         monkeyMap["root"]!!.yell()
         monkeyMap["root"]!!.updateShouldBe()
         val result = monkeyMap["humn"]!!.shouldBe
@@ -36,7 +34,7 @@ class Monkey(private val inputStr: String) {
     val name: String = inputStr.substringBefore(": ")
 
     var shouldBe: Long? = null
-    private var number: String? = null
+    private var number: Long? = null
     private var leftOperand: Monkey? = null
     private var rightOperand: Monkey? = null
     private var operator: Char? = null
@@ -46,8 +44,8 @@ class Monkey(private val inputStr: String) {
         operator = operatorChar
     }
 
-    fun setNumber(overrideNumber: String) {
-        number = overrideNumber
+    fun clearNumber() {
+        number = null //todo
         leftOperand = null
         rightOperand = null
         operator = null
@@ -55,43 +53,38 @@ class Monkey(private val inputStr: String) {
 
 
     fun makeFunctional(monkeyMap: Map<String, Monkey>) {
-        val numberLong = inputStr.substringAfter(": ").toLongOrNull()
-        if (numberLong == null) {
-            number = null
+        number = inputStr.substringAfter(": ").toLongOrNull()
+        if (number == null) {
             val leftStr = inputStr.substringAfter(": ").substringBefore(" ")
             val rightStr = inputStr.substringAfterLast(" ")
             leftOperand = monkeyMap[leftStr]
             rightOperand = monkeyMap[rightStr]
             operator = inputStr.substringAfter(": ").substringAfter(" ").first()
-        } else {
-            number = numberLong.toString()
         }
     }
 
-    fun yell(): String {
-        if (number == null) {
+    fun yell(): Long? {
+        if (leftOperand != null && rightOperand != null) {
             number = operation(leftOperand!!, operator!!, rightOperand!!)
         }
-        return number!!
+        return number
     }
 
-    private fun operation(leftOperand: Monkey, operator: Char, rightOperand: Monkey) : String {
+    private fun operation(leftOperand: Monkey, operator: Char, rightOperand: Monkey) : Long? {
         val left = leftOperand.yell()
         val right = rightOperand.yell()
 
-        if (left.toLongOrNull() != null && right.toLongOrNull() != null) {
+        if (left != null && right != null) {
             val result = when (operator) {
-                '+' -> left.toLong() + right.toLong()
-                '*' -> left.toLong() * right.toLong()
-                '-' -> left.toLong() - right.toLong()
-                '/' -> left.toLong() / right.toLong()
+                '+' -> left + right
+                '*' -> left * right
+                '-' -> left - right
+                '/' -> left / right
                 else -> 999999
             }
-            return result.toString()
-        } else if (left.toLongOrNull() != null) {
-            return left.toLong().toString() + operator + "(" + right +  ")"
+            return result
         } else {
-            return "(" + left + ")" + operator + right.toLong().toString()
+            return null
         }
     }
 
@@ -110,28 +103,27 @@ class Monkey(private val inputStr: String) {
             return
         }
 
-        if (leftOperand!!.number!!.toLongOrNull() == null && rightOperand!!.number!!.toLongOrNull() != null) {
+        if (leftOperand!!.number == null && rightOperand!!.number != null) {
             leftOperand!!.shouldBe = when (operator) {
-                '*' -> shouldBe!! / rightOperand!!.number!!.toLong()
-                '/' -> shouldBe!! * rightOperand!!.number!!.toLong()
-                '-' -> shouldBe!! + rightOperand!!.number!!.toLong()
-                '+' -> shouldBe!! - rightOperand!!.number!!.toLong()
+                '*' -> shouldBe!! / rightOperand!!.number!!
+                '/' -> shouldBe!! * rightOperand!!.number!!
+                '-' -> shouldBe!! + rightOperand!!.number!!
+                '+' -> shouldBe!! - rightOperand!!.number!!
                 else -> 99999
             }
             leftOperand!!.determineShouldBeOfChild()
-        } else if (leftOperand!!.number!!.toLongOrNull() != null && rightOperand!!.number!!.toLongOrNull() == null) {
+        } else if (leftOperand!!.number != null && rightOperand!!.number == null) {
             rightOperand!!.shouldBe = when (operator) {
-                '*' -> shouldBe!! / leftOperand!!.number!!.toLong()
-                '/' -> leftOperand!!.number!!.toLong() / shouldBe!!
-                '-' -> leftOperand!!.number!!.toLong() - shouldBe!!
-                '+' -> shouldBe!! - leftOperand!!.number!!.toLong()
+                '*' -> shouldBe!! / leftOperand!!.number!!
+                '/' -> leftOperand!!.number!! / shouldBe!!
+                '-' -> leftOperand!!.number!! - shouldBe!!
+                '+' -> shouldBe!! - leftOperand!!.number!!
                 else -> 99999
             }
             rightOperand!!.determineShouldBeOfChild()
         } else {
             println("MMM, surprise....")
         }
-
     }
 
 
