@@ -9,13 +9,13 @@ fun main() {
 class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
 
     override fun resultPartOne(): String {
-        val monkeyMap = input.inputLines.map { Monkey(it) }.associate { it.name to it }
+        val monkeyMap = input.inputLines.map { Monkey(it) }.associateBy { it.name }
         monkeyMap.values.forEach { it.makeFunctional(monkeyMap) }
         return monkeyMap["root"]!!.yell().toString()
     }
 
     override fun resultPartTwo(): String {
-        val monkeyMap = input.inputLines.map { Monkey(it) }.associate { it.name to it }
+        val monkeyMap = input.inputLines.map { Monkey(it) }.associateBy { it.name }
         monkeyMap.values.forEach { it.makeFunctional(monkeyMap) }
 
         monkeyMap["root"]!!.setOperator('-')
@@ -25,7 +25,6 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
         val result = monkeyMap["humn"]!!.shouldBe
         return result.toString()
     }
-
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -45,7 +44,7 @@ class Monkey(private val inputStr: String) {
     }
 
     fun clearNumber() {
-        number = null //todo
+        number = null
         leftOperand = null
         rightOperand = null
         operator = null
@@ -74,7 +73,7 @@ class Monkey(private val inputStr: String) {
         val left = leftOperand.yell()
         val right = rightOperand.yell()
 
-        if (left != null && right != null) {
+        return if (left != null && right != null) {
             val result = when (operator) {
                 '+' -> left + right
                 '*' -> left * right
@@ -82,9 +81,9 @@ class Monkey(private val inputStr: String) {
                 '/' -> left / right
                 else -> 999999
             }
-            return result
+            result
         } else {
-            return null
+            null
         }
     }
 
@@ -129,10 +128,10 @@ class Monkey(private val inputStr: String) {
 
     fun print() {
         print("$name: ")
-        if (number != null) {
-            println("$number")
-        } else {
+        if (leftOperand != null && rightOperand != null) {
             println("${leftOperand!!.name} $operator ${rightOperand!!.name}")
+        } else {
+            println("$number")
         }
     }
 }
