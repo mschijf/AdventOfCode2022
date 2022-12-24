@@ -1,9 +1,7 @@
 package com.adventofcode.december19
 
 import com.adventofcode.PuzzleSolverAbstract
-import kotlin.math.E
-import kotlin.math.absoluteValue
-import kotlin.math.min
+import java.lang.System.currentTimeMillis
 
 fun main() {
     PuzzleSolver(test=false).showResult()
@@ -17,17 +15,19 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
     override fun resultPartOne(): String {
         var quality = 0
         for (bluePrint in bluePrintList) {
+            val startTime = currentTimeMillis()
             val executor = Executor(bluePrint)
             print("Start Blueprint ${bluePrint.number} of ${bluePrintList.size}")
+
             cache.forEach { it.clear() }
+
             val gc = solver(executor, 24)
-            println(" --> $gc")
+            val timePassed = currentTimeMillis() - startTime
+            println(" --> $gc time: $timePassed ms")
             quality += (gc*bluePrint.number)
         }
         return quality.toString()
     }
-
-    //2258 -- too low
 
     private fun solver(executor: Executor, minutesLeft: Int): Int {
         if (minutesLeft <= 0) {
