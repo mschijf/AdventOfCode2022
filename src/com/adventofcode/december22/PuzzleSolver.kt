@@ -261,8 +261,8 @@ class Board(inputLines: List<String>) {
             if (newRow < 0 || (legal(newRow, newCol) && board[newRow][newCol] == ' ' && dir == Direction.UP) ) {
                 //up
                 return when (newCubeFacePair.second) {
-//                     90 -> Pair(Pos(row=startRowOfCubeFace(newFace) + cubeFaceWidth - faceCol - 1, col=startColOfCubeFace(newFace) + cubeFaceWidth - 1), dir.turn('L'))
-//                    180 -> Pair(Pos(row=startRowOfCubeFace(newFace)                              , col=startColOfCubeFace(newFace) + cubeFaceWidth - faceCol - 1), dir.turn('L').turn('L'))
+                     90 -> Pair(Pos(row=startRowOfCubeFace(newFace) + cubeFaceWidth - faceCol - 1, col=startColOfCubeFace(newFace) + cubeFaceWidth - 1), dir.turn('L'))
+                    180 -> Pair(Pos(row=startRowOfCubeFace(newFace)                              , col=startColOfCubeFace(newFace) + cubeFaceWidth - faceCol - 1), dir.turn('L').turn('L'))
                     270 -> Pair(Pos(row=startRowOfCubeFace(newFace) + faceCol                    , col=startColOfCubeFace(newFace)), dir.turn('R'))
                     360 -> Pair(Pos(row=startRowOfCubeFace(newFace) + cubeFaceWidth - 1          , col=startColOfCubeFace(newFace) + faceCol), dir.turn('O'))
                     else -> throw Exception("Die ${newCubeFacePair.second} had ik niet verwacht (up)")
@@ -270,8 +270,8 @@ class Board(inputLines: List<String>) {
             } else if (newRow >= height || (legal(newRow, newCol) && board[newRow][newCol] == ' ' && dir == Direction.DOWN)) {
                 //down
                 return when (newCubeFacePair.second) {
-//                     90 -> Pair(Pos(row=startRowOfCubeFace(newFace) + cubeFaceWidth - faceCol - 1, col=startColOfCubeFace(newFace)), dir.turn('L'))
-//                    180 -> Pair(Pos(row=startRowOfCubeFace(newFace) + cubeFaceWidth - 1          , col=startColOfCubeFace(newFace) + cubeFaceWidth - faceCol - 1), dir.turn('L').turn('L'))
+                     90 -> Pair(Pos(row=startRowOfCubeFace(newFace) + cubeFaceWidth - faceCol - 1, col=startColOfCubeFace(newFace)), dir.turn('L'))
+                    180 -> Pair(Pos(row=startRowOfCubeFace(newFace) + cubeFaceWidth - 1          , col=startColOfCubeFace(newFace) + cubeFaceWidth - faceCol - 1), dir.turn('L').turn('L'))
                     270 -> Pair(Pos(row=startRowOfCubeFace(newFace) + faceCol                    , col=startColOfCubeFace(newFace) + cubeFaceWidth - 1), dir.turn('R'))
                     360 -> Pair(Pos(row=startRowOfCubeFace(newFace)                              , col=startColOfCubeFace(newFace) + faceCol), dir.turn('O'))
                     else -> throw Exception("Die ${newCubeFacePair.second} had ik niet verwacht (down)")
@@ -281,7 +281,7 @@ class Board(inputLines: List<String>) {
                 return when (newCubeFacePair.second) {
                      90 -> Pair(Pos(row=startRowOfCubeFace(newFace)                              , col=startColOfCubeFace(newFace) + faceRow), dir.turn('L'))
                     180 -> Pair(Pos(row=startRowOfCubeFace(newFace) + cubeFaceWidth - faceRow - 1, col=startColOfCubeFace(newFace) ), dir.turn('L').turn('L'))
-//                    270 -> Pair(Pos(row=startRowOfCubeFace(newFace) + cubeFaceWidth - 1          , col=startColOfCubeFace(newFace) + faceRow), dir.turn('R'))
+                    270 -> Pair(Pos(row=startRowOfCubeFace(newFace) + cubeFaceWidth - 1          , col=startColOfCubeFace(newFace) + cubeFaceWidth - faceRow - 1), dir.turn('R'))
                     else -> throw Exception("Die ${newCubeFacePair.second} had ik niet verwacht (left)")
                 }
             } else if (newCol >= width || (legal(newRow, newCol) && board[newRow][newCol] == ' ' && dir == Direction.RIGHT)) {
@@ -289,7 +289,7 @@ class Board(inputLines: List<String>) {
                 return when (newCubeFacePair.second) {
                      90 -> Pair(Pos(row=startRowOfCubeFace(newFace) + cubeFaceWidth - 1          , col=startColOfCubeFace(newFace) + faceRow), dir.turn('L'))
                     180 -> Pair(Pos(row=startRowOfCubeFace(newFace) + cubeFaceWidth - faceRow - 1, col=startColOfCubeFace(newFace) + cubeFaceWidth - 1), dir.turn('L').turn('L'))
-//                    270 -> Pair(Pos(row=startRowOfCubeFace(newFace)                              , col=startColOfCubeFace(newFace) + cubeFaceWidth - faceRow - 1), dir.turn('R'))
+                    270 -> Pair(Pos(row=startRowOfCubeFace(newFace)                              , col=startColOfCubeFace(newFace) + cubeFaceWidth - faceRow - 1), dir.turn('R'))
                     else -> throw Exception("Die ${newCubeFacePair.second} had ik niet verwacht (Right)")
                 }
             } else if (board[newRow][newCol] == ' ') {
