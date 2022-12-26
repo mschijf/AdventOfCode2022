@@ -13,6 +13,7 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
 
     private val cache = Array(33) {HashMap<String, Int>()}
 
+    private var nodeCount = 0L
     override fun resultPartOne(): String {
         var quality = 0
         for (bluePrint in bluePrintList) {
@@ -20,10 +21,11 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
             val executor = Executor(bluePrint)
             print("Start Blueprint ${bluePrint.number} of ${bluePrintList.size}")
 
+            nodeCount = 0L
             cache.forEach { it.clear() }
             val gc = solver(executor, 24, -1)
             val timePassed = currentTimeMillis() - startTime
-            println(" --> $gc time: $timePassed ms")
+            println(" --> $gc time: $timePassed ms and $nodeCount nodes visited")
 
             quality += gc*bluePrint.number
         }
@@ -48,6 +50,7 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
     }
 
     private fun solver(executor: Executor, minutesLeft: Int, maxToReach: Int): Int {
+        nodeCount++
         if (minutesLeft <= 0) {
             return executor.geodeCount
         }
