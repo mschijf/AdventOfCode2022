@@ -52,6 +52,12 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
             return executor.geodeCount
         }
 
+        // biggest improvement: cut off, of trees that will never can be any better than we heave reached so far
+        // idea: each second left, we can make maximal one geode robot
+        //       this results in (for n seconds left), collecting of (n-1) + (n-2) + n-3) + .. 1 geodes
+        //       which is n*(n-1)/2 geodes.
+        // together with the geode robots we already have, this results in a (upper estimate) of the total amount of geode
+        //
         val maxPotentialGeode = (minutesLeft * (minutesLeft-1))/2
         if (executor.geodeCount + executor.geodeRobotCount * minutesLeft + maxPotentialGeode <= maxToReach) {
             return -1
@@ -62,6 +68,9 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
         }
 
 
+        //
+        // this optimization is probably not very necessary, but we kept it in it.
+        //
         if (minutesLeft == 2) {
             return if (!executor.canBeMade(RobotType.GEODE)) {
                 executor.geodeCount + minutesLeft*executor.geodeRobotCount
@@ -70,6 +79,10 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
             }
         }
 
+        //
+        // if we can make a geode robot, let's do it
+        // always better than waiting (unproved assumption)
+        //
         if (executor.canBeMade(RobotType.GEODE)) {
             executor.doAction(RobotType.GEODE)
             val searchResult = solver(executor, minutesLeft - 1, maxToReach)
@@ -78,6 +91,9 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
             return searchResult
         }
 
+        //
+        // finally, check all possibilities
+        //
         var bestResult = -1
         val actionList = executor.generateActionList()
         for (robotType in actionList) {
