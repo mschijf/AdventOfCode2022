@@ -1,7 +1,7 @@
 package com.adventofcode
 
 abstract class PuzzleSolverAbstract (
-    private val test: Boolean) {
+    val test: Boolean) {
     private val dayOfMonth = getDayOfMonthFromSubClassName()
     protected val input = Input(test, dayOfMonth)
 
