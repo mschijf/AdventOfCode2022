@@ -13,24 +13,22 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
 
     private val cache = Array(33) {HashMap<String, Int>()}
 
-//    override fun resultPartOne(): String {
-//        var quality = 0
-//        for (bluePrint in bluePrintList) {
-//            val startTime = currentTimeMillis()
-//            val executor = Executor(bluePrint)
-//            print("Start Blueprint ${bluePrint.number} of ${bluePrintList.size}")
-//
-//            cache.forEach { it.clear() }
-//            val gc = solver(executor, 24, -1, emptyList())
-//            val timePassed = currentTimeMillis() - startTime
-//            println(" --> $gc time: $timePassed ms")
-//
-//            quality += (gc.geodeCollected*bluePrint.number)
-//        }
-//        return quality.toString()
-//    }
+    override fun resultPartOne(): String {
+        var quality = 0
+        for (bluePrint in bluePrintList) {
+            val startTime = currentTimeMillis()
+            val executor = Executor(bluePrint)
+            print("Start Blueprint ${bluePrint.number} of ${bluePrintList.size}")
 
-    //10064 --> too low
+            cache.forEach { it.clear() }
+            val gc = solver(executor, 24, -1)
+            val timePassed = currentTimeMillis() - startTime
+            println(" --> $gc time: $timePassed ms")
+
+            quality += gc*bluePrint.number
+        }
+        return quality.toString()
+    }
 
     override fun resultPartTwo(): String {
         var quality = 1
@@ -40,76 +38,60 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
             print("Start Blueprint ${bluePrint.number} of ${bluePrintList.size}")
 
             cache.forEach { it.clear() }
-            val gc = solver(executor, 32, -1, emptyList())
+            val gc = solver(executor, 32, -1)
             val timePassed = currentTimeMillis() - startTime
             println(" --> $gc time: $timePassed ms")
 
-//            val startTime2 = currentTimeMillis()
-//            val executor2 = Executor(bluePrint)
-//            cache.forEach { it.clear() }
-//            print("     nu tot 32: ${bluePrint.number} of ${bluePrintList.size}")
-//            val gc2 = solver(executor2, 32, gc.geodeCollected, gc.path)
-//            val timePassed2 = currentTimeMillis() - startTime2
-//            println(" --> $gc2 time: $timePassed2 ms")
-
-            quality *= (gc.geodeCollected)
+            quality *= gc
         }
         return quality.toString()
     }
 
-    private fun solver(executor: Executor, minutesLeft: Int, maxToReach: Int, suggestedActionPath: List<RobotType>): SearchInfo {
+    private fun solver(executor: Executor, minutesLeft: Int, maxToReach: Int): Int {
         if (minutesLeft <= 0) {
-            return SearchInfo(executor.geodeCount, emptyList())
+            return executor.geodeCount
         }
 
         val maxPotentialGeode = (minutesLeft * (minutesLeft-1))/2
         if (executor.geodeCount + executor.geodeRobotCount * minutesLeft + maxPotentialGeode <= maxToReach) {
-            return SearchInfo(-1, emptyList())
+            return -1
         }
 
         if (cache[minutesLeft].contains(executor.hashString())) {
-            return SearchInfo(cache[minutesLeft][executor.hashString()] ?: -1, emptyList())
+            return cache[minutesLeft][executor.hashString()] ?: -1
         }
 
 
-//        if (minutesLeft == 2) {
-//            if (!executor.canBeMade(RobotType.GEODE)) {
-//                return SearchInfo(executor.geodeCount + minutesLeft*executor.geodeRobotCount,
-//                    listOf(RobotType.NONE, RobotType.NONE))
-//            } else {
-//                return SearchInfo(executor.geodeCount + minutesLeft*executor.geodeRobotCount + 1,
-//                    listOf(RobotType.NONE, RobotType.GEODE))
-//            }
-//        }
-//
-//        if (executor.canBeMade(RobotType.GEODE)) {
-//            executor.doAction(RobotType.GEODE)
-//            val searchResult = solver(executor, minutesLeft - 1, maxToReach, suggestedActionPath.drop(1))
-//            cache[minutesLeft][executor.hashString()] = searchResult.geodeCollected
-//            executor.undoAction(RobotType.GEODE)
-//            return SearchInfo(searchResult.geodeCollected, listOf(RobotType.GEODE) + searchResult.path)
-//        }
+        if (minutesLeft == 2) {
+            return if (!executor.canBeMade(RobotType.GEODE)) {
+                executor.geodeCount + minutesLeft*executor.geodeRobotCount
+            } else {
+                executor.geodeCount + minutesLeft*executor.geodeRobotCount + 1
+            }
+        }
 
-        var bestResult = SearchInfo(-1, emptyList())
-        val actionList = executor.generateActionList(suggestedActionPath.firstOrNull()?:RobotType.GEODE)
+        if (executor.canBeMade(RobotType.GEODE)) {
+            executor.doAction(RobotType.GEODE)
+            val searchResult = solver(executor, minutesLeft - 1, maxToReach)
+            cache[minutesLeft][executor.hashString()] = searchResult
+            executor.undoAction(RobotType.GEODE)
+            return searchResult
+        }
+
+        var bestResult = -1
+        val actionList = executor.generateActionList()
         for (robotType in actionList) {
             executor.doAction(robotType)
-            val searchResult = solver(executor, minutesLeft - 1, max(maxToReach, bestResult.geodeCollected), suggestedActionPath.drop(1))
-            if (searchResult.better(bestResult)) {
-                bestResult = SearchInfo(searchResult.geodeCollected, listOf(robotType) + searchResult.path)
+            val searchResult = solver(executor, minutesLeft - 1, max(maxToReach, bestResult))
+            if (searchResult > bestResult) {
+                bestResult = searchResult
             }
             executor.undoAction(robotType)
         }
-        cache[minutesLeft][executor.hashString()] = bestResult.geodeCollected
+        cache[minutesLeft][executor.hashString()] = bestResult
 
         return bestResult
     }
-}
-
-class SearchInfo(val geodeCollected: Int, val path: List<RobotType>) {
-    fun better(other: SearchInfo): Boolean = geodeCollected > other.geodeCollected
-//    override fun toString() = "$geodeCollected \n  $path"
-    override fun toString() = "$geodeCollected"
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -127,15 +109,11 @@ class Executor(private val bluePrint: BluePrint) {
 
     fun hashString() = "$oreRobotCount,$clayRobotCount,$obsidianRobotCount,$geodeRobotCount,$oreCount,$clayCount,$obsidianCount,$geodeCount"
 
-    fun generateActionList(suggestedAction: RobotType) : List<RobotType> {
-        var result = mutableListOf<RobotType>()
+    fun generateActionList() : List<RobotType> {
+        val result = mutableListOf<RobotType>()
         for (robotType in RobotType.values()) {
             if (this.canBeMade(robotType)) {
-                if (robotType == suggestedAction) {
-                    result.add(0, robotType)
-                } else {
-                    result.add(robotType)
-                }
+                result.add(robotType)
             }
         }
         return result
@@ -156,10 +134,10 @@ class Executor(private val bluePrint: BluePrint) {
     fun canBeMade(robotType: RobotType) : Boolean {
         return when (robotType) {
             RobotType.NONE -> true
-            RobotType.ORE -> bluePrint.oreRobot.canBeMade(oreCount, clayCount, obsidianCount)
-            RobotType.CLAY -> bluePrint.clayRobot.canBeMade(oreCount, clayCount, obsidianCount)
-            RobotType.OBSIDIAN -> bluePrint.obsidianRobot.canBeMade(oreCount, clayCount, obsidianCount)
-            RobotType.GEODE -> bluePrint.geodeRobot.canBeMade(oreCount, clayCount, obsidianCount)
+            RobotType.ORE -> bluePrint.oreRobot.canBeMade(oreCount)
+            RobotType.CLAY -> bluePrint.clayRobot.canBeMade(oreCount)
+            RobotType.OBSIDIAN -> bluePrint.obsidianRobot.canBeMade(oreCount, clayCount)
+            RobotType.GEODE -> bluePrint.geodeRobot.canBeMade(oreCount, obsidianCount)
         }
     }
 
@@ -254,7 +232,7 @@ class BluePrint(inputStr: String) {
 class OreRobot(inputStr: String) {
     val oreCosts = inputStr.substringAfter("Each ore robot costs ").substringBefore(" ore. Each clay robot costs").toInt()
 
-    fun canBeMade(oreCount: Int, clayCount: Int, obsidianCount: Int): Boolean {
+    fun canBeMade(oreCount: Int): Boolean {
         return oreCosts <= oreCount
     }
 }
@@ -262,7 +240,7 @@ class OreRobot(inputStr: String) {
 class ClayRobot(inputStr: String) {
     val oreCosts = inputStr.substringAfter("Each clay robot costs ").substringBefore(" ore. Each obsidian robot costs").toInt()
 
-    fun canBeMade(oreCount: Int, clayCount: Int, obsidianCount: Int): Boolean {
+    fun canBeMade(oreCount: Int): Boolean {
         return oreCosts <= oreCount
     }
 }
@@ -271,7 +249,7 @@ class ObsidianRobot(inputStr: String) {
     val oreCosts = inputStr.substringAfter("Each obsidian robot costs ").substringBefore(" ore and ").toInt()
     val clayCosts = inputStr.substringAfter(" ore and ").substringBefore(" clay. Each geode robot costs ").toInt()
 
-    fun canBeMade(oreCount: Int, clayCount: Int, obsidianCount: Int): Boolean {
+    fun canBeMade(oreCount: Int, clayCount: Int): Boolean {
         return oreCosts <= oreCount && clayCosts <= clayCount
     }
 }
@@ -280,7 +258,7 @@ class GeodeRobot(inputStr: String) {
     val oreCosts = inputStr.substringAfter("Each geode robot costs ").substringBefore(" ore and ").toInt()
     val obsidianCosts = inputStr.substringAfter("Each geode robot costs ").substringAfter(" ore and ").substringBefore(" obsidian.").toInt()
 
-    fun canBeMade(oreCount: Int, clayCount: Int, obsidianCount: Int): Boolean {
+    fun canBeMade(oreCount: Int, obsidianCount: Int): Boolean {
         return oreCosts <= oreCount && obsidianCosts <= obsidianCount
     }
 }
