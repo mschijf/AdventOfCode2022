@@ -1,7 +1,6 @@
 package com.adventofcode.december24
 
 import com.adventofcode.PuzzleSolverAbstract
-import kotlin.math.min
 
 fun main() {
     PuzzleSolver(test=false).showResult()
@@ -46,10 +45,10 @@ class Valley(inputLines: List<String>) {
     val startPos = Pos(0, valley.first().indexOfFirst { it.isGround } )
     val endPos = Pos(valley.lastIndex, valley.last().indexOfFirst { it.isGround } )
 
-    fun isFreeField(row: Int, col: Int) = (row in 0 until maxRow) && (col in 0 until maxCol) && valley[row][col].blizzardList.isEmpty() && valley[row][col].isGround
+    private fun isFreeField(row: Int, col: Int) = (row in 0 until maxRow) && (col in 0 until maxCol) && valley[row][col].blizzardList.isEmpty() && valley[row][col].isGround
 
     fun generateMoves(elf: Pos): List<Pos> {
-        val result = if (isFreeField(elf.row, elf.col)) mutableListOf<Pos>(elf) else mutableListOf<Pos>()
+        val result = if (isFreeField(elf.row, elf.col)) mutableListOf(elf) else mutableListOf()
         for (direction in Direction.values()) {
             if (isFreeField(elf.row+direction.dRow, elf.col + direction.dCol)) {
                 result.add(Pos(elf.row+direction.dRow, elf.col + direction.dCol))
@@ -79,6 +78,17 @@ class Valley(inputLines: List<String>) {
             }
         }
     }
+
+    private fun toDirection(blizzardChar: Char): Direction {
+        return when (blizzardChar) {
+            '>' -> Direction.RIGHT
+            '<' -> Direction.LEFT
+            '^' -> Direction.UP
+            'v' -> Direction.DOWN
+            else -> throw Exception("Unexpected Blizzard Char")
+        }
+    }
+
 
     private fun nextBlizzardPos(row: Int, col: Int, dir: Direction): Pos {
         val newRow = row + dir.dRow
