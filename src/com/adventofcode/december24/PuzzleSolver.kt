@@ -38,7 +38,7 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
 //----------------------------------------------------------------------------------------------------------------------
 
 class Valley(inputLines: List<String>) {
-    private val valley = inputLines.map{ str -> Array(str.length) { i -> PositionInfo(str[i]) } }
+    private val valley = inputLines.map{ str -> List(str.length) { i -> PositionInfo(str[i]) } }
     private val maxRow = valley.size
     private val maxCol = valley[0].size
 
