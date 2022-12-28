@@ -9,20 +9,28 @@ abstract class PuzzleSolverAbstract (
     open fun resultPartTwo(): String = "NOT IMPLEMENTED"
 
     fun showResult() {
+
+
         println("Day          : $dayOfMonth")
         println("Version      : ${if (test) "test" else "real"} input")
         println("Input lines  : ${if (input.inputLines.isEmpty()) "NO INPUT!!" else input.inputLines.count()} ")
         println("---------------------------------")
-        println("Result part 1: ${resultPartOne()}")
-        println("Result part 2: ${resultPartTwo()}")
+
+        printResult(1) { resultPartOne() }
+        printResult(2) { resultPartTwo() }
+    }
+
+    private fun printResult(puzzlePart: Int, getResult: () -> String ) {
+        val startTime = System.currentTimeMillis()
+        val result = getResult()
+        val timePassed = System.currentTimeMillis() - startTime
+        println("Result part $puzzlePart: $result (after ${timePassed / 1000}.${timePassed % 1000} sec)")
     }
 
     private fun getDayOfMonthFromSubClassName(): Int {
         val className = this.javaClass.name
         val monthName = "december"
-        val i = className.indexOf(monthName)
-        val j = className.lastIndexOf(".")
-        val dayOfMonth = className.substring(i + monthName.length, j)
+        val dayOfMonth = className.substringAfter(monthName).substringBeforeLast(".")
         return dayOfMonth.toInt()
     }
 }
