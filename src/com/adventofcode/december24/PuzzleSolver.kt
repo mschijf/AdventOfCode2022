@@ -1,58 +1,39 @@
 package com.adventofcode.december24
 
 import com.adventofcode.PuzzleSolverAbstract
-import kotlin.math.absoluteValue
+import kotlin.math.min
 
 fun main() {
-    PuzzleSolver(test=true).showResult()
+    PuzzleSolver(test=false).showResult()
 }
 
 class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
-    private val valley = Valley(input.inputLines)
-
-    var cache = HashMap<Int, Int>()
 
     override fun resultPartOne(): String {
-        val tree = Tree(valley)
-        val optimalPath = tree.search()
-        return "NOU NOU: $optimalPath"
+        val valley = Valley(input.inputLines)
+        val minutesPassed = walkTo(valley, valley.startPos, valley.endPos)
+        return minutesPassed.toString()
     }
-//
-//    private fun solver(elf: Pos, treeDepth: Int, minutesPassed: Int): Int {
-//        if (valley.isEndPos(elf.row, elf.col)) { // end position
-//            return minutesPassed
-//        }
-//        if (treeDepth == 0) {
-//            return 99999
-//        }
-//
-//        if (cache.contains(100000*minutesPassed + 1000*elf.row + elf.col)) {
-//            return cache[100000*minutesPassed + 1000*elf.row + elf.col]!!
-//        }
-//
-//        var fastestPath = 99999
-//        valley.doBlizzardMove()
-//        for (newElfPos in generateMoves(elf)) {
-//            val value = solver(newElfPos, treeDepth-1, minutesPassed+1)
-//            if (value < fastestPath) {
-//                fastestPath = value
-//            }
-//        }
-//        valley.undoBlizzardMove()
-//
-//        cache[100000*minutesPassed + 1000*elf.row + elf.col] = fastestPath
-//        return fastestPath
-//    }
-//
-//    private fun generateMoves(elf: Pos): List<Pos> {
-//        val result = mutableListOf<Pos>(elf)
-//        for (direction in Direction.values()) {
-//            if (valley.isFreeField(elf.row+direction.dRow, elf.col + direction.dCol)) {
-//                result.add(Pos(elf.row+direction.dRow, elf.col + direction.dCol))
-//            }
-//        }
-//        return result.sortedBy { move -> move.distance(valley.endPos) }
-//    }
+
+    override fun resultPartTwo(): String {
+        val valley = Valley(input.inputLines)
+        val minutesPassed1 = walkTo(valley, valley.startPos, valley.endPos)
+        val minutesPassed2 = walkTo(valley, valley.endPos, valley.startPos)
+        val minutesPassed3 = walkTo(valley, valley.startPos, valley.endPos)
+        return (minutesPassed1 + minutesPassed2 + minutesPassed3).toString()
+    }
+
+    private fun walkTo(valley: Valley, fromPos: Pos, toPos: Pos):Int {
+        var minutesPassed = 0
+        var candidatePerMinuteSet = setOf(fromPos)
+
+        while (!candidatePerMinuteSet.contains(toPos)) {
+            minutesPassed++
+            valley.doBlizzardMove()
+            candidatePerMinuteSet = candidatePerMinuteSet.map{elfPos -> valley.generateMoves(elfPos)}.flatten().toSet()
+        }
+        return minutesPassed
+    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -65,8 +46,17 @@ class Valley(inputLines: List<String>) {
     val startPos = Pos(0, valley.first().indexOfFirst { it.isGround } )
     val endPos = Pos(valley.lastIndex, valley.last().indexOfFirst { it.isGround } )
 
-    fun isEndPos(row: Int, col: Int) = (row == maxRow - 1) && valley[row][col].isGround
     fun isFreeField(row: Int, col: Int) = (row in 0 until maxRow) && (col in 0 until maxCol) && valley[row][col].blizzardList.isEmpty() && valley[row][col].isGround
+
+    fun generateMoves(elf: Pos): List<Pos> {
+        val result = if (isFreeField(elf.row, elf.col)) mutableListOf<Pos>(elf) else mutableListOf<Pos>()
+        for (direction in Direction.values()) {
+            if (isFreeField(elf.row+direction.dRow, elf.col + direction.dCol)) {
+                result.add(Pos(elf.row+direction.dRow, elf.col + direction.dCol))
+            }
+        }
+        return result
+    }
 
     fun doBlizzardMove() {
         for (row in valley.indices) {
@@ -90,30 +80,6 @@ class Valley(inputLines: List<String>) {
         }
     }
 
-    fun undoBlizzardMove() {
-        for (row in valley.indices) {
-            for (col in valley[row].indices) {
-                valley[row][col].blizzardList.forEach {blizzard ->
-                    val previousBlizzardPos = when (blizzard) {
-                        '>' -> nextBlizzardPos(row, col, Direction.LEFT)
-                        '<' -> nextBlizzardPos(row, col, Direction.RIGHT)
-                        '^' -> nextBlizzardPos(row, col, Direction.DOWN)
-                        'v' -> nextBlizzardPos(row, col, Direction.UP)
-                        else -> Pos(0,0)
-                    }
-                    valley[previousBlizzardPos.row][previousBlizzardPos.col].addBlizzard(blizzard)
-                }
-            }
-        }
-        for (row in valley.indices) {
-            for (col in valley[row].indices) {
-                valley[row][col].alignBlizzards()
-            }
-        }
-    }
-
-
-
     private fun nextBlizzardPos(row: Int, col: Int, dir: Direction): Pos {
         val newRow = row + dir.dRow
         val newCol = col + dir.dCol
@@ -126,55 +92,55 @@ class Valley(inputLines: List<String>) {
         }
     }
 
-    fun print() {
+    fun print(candidatePerMinuteSet: Set<Pos>) {
         for (row in valley.indices) {
             for (col in valley[row].indices) {
-                valley[row][col].print()
+                if (Pos(row, col) in candidatePerMinuteSet) {
+                    print("E")
+                } else {
+                    valley[row][col].print()
+                }
             }
             println()
         }
     }
-}
 
-class PositionInfo(inputChar: Char) {
-    val isWall = inputChar == '#'
-    val isGround = inputChar != '#'
+    inner class PositionInfo(inputChar: Char) {
+        val isWall = inputChar == '#'
+        val isGround = inputChar != '#'
 
-    val blizzardList = listOfNotNull(if (inputChar in "<>^v") inputChar else null).toMutableList()
-    private val afterMoveBlizzardList = mutableListOf<Char>()
+        val blizzardList = listOfNotNull(if (inputChar in "<>^v") inputChar else null).toMutableList()
+        private val afterMoveBlizzardList = mutableListOf<Char>()
 
-    fun addBlizzard(blizzardChar: Char) {
-        afterMoveBlizzardList.add(blizzardChar)
-    }
+        fun addBlizzard(blizzardChar: Char) {
+            afterMoveBlizzardList.add(blizzardChar)
+        }
 
-    fun alignBlizzards() {
-        blizzardList.clear()
-        blizzardList.addAll(afterMoveBlizzardList)
-        afterMoveBlizzardList.clear()
-    }
+        fun alignBlizzards() {
+            blizzardList.clear()
+            blizzardList.addAll(afterMoveBlizzardList)
+            afterMoveBlizzardList.clear()
+        }
 
-    fun print() {
-        if (isWall) {
-            print('#')
-        } else if (blizzardList.isEmpty()) {
-            print('.')
-        } else if (blizzardList.size == 1) {
-            print(blizzardList.first())
-        } else {
-            print(blizzardList.size)
+        fun print() {
+            if (isWall) {
+                print('#')
+            } else if (blizzardList.isEmpty()) {
+                print('.')
+            } else if (blizzardList.size == 1) {
+                print(blizzardList.first())
+            } else {
+                print(blizzardList.size)
+            }
         }
     }
+
 }
+
 
 class Pos(val row: Int, val col: Int) {
     override fun hashCode() = 1000* row + col
-    override fun equals(other: Any?): Boolean {
-        if (other is Pos)
-            return other.row == row && other.col == col
-        return super.equals(other)
-    }
-
-    fun distance(other: Pos) = (row - other.row).absoluteValue + (col - other.col).absoluteValue
+    override fun equals(other: Any?) = if (other is Pos) other.row == row && other.col == col else super.equals(other)
 }
 
 enum class Direction(val dRow: Int, val dCol: Int) {
