@@ -45,30 +45,21 @@ class Valley(inputLines: List<String>) {
     val startPos = Pos(0, valley.first().indexOfFirst { it.isGround } )
     val endPos = Pos(valley.lastIndex, valley.last().indexOfFirst { it.isGround } )
 
-    private fun isFreeField(row: Int, col: Int) = (row in 0 until maxRow) && (col in 0 until maxCol) && valley[row][col].blizzardList.isEmpty() && valley[row][col].isGround
+    private fun isFreeField(pos: Pos) = (pos.row in 0 until maxRow) && (pos.col in 0 until maxCol) && valley[pos.row][pos.col].blizzardList.isEmpty() && valley[pos.row][pos.col].isGround
 
     fun generateMoves(elf: Pos): List<Pos> {
-        val result = if (isFreeField(elf.row, elf.col)) mutableListOf(elf) else mutableListOf()
-        for (direction in Direction.values()) {
-            if (isFreeField(elf.row+direction.dRow, elf.col + direction.dCol)) {
-                result.add(Pos(elf.row+direction.dRow, elf.col + direction.dCol))
-            }
-        }
-        return result
+        return Direction.values()
+            .map { direction -> elf.moveTo(direction) }
+            .plusElement(elf)
+            .filter {newPos -> isFreeField(newPos)}
     }
 
     fun doBlizzardMove() {
         for (row in valley.indices) {
             for (col in valley[row].indices) {
-                valley[row][col].blizzardList.forEach {blizzard ->
-                    val nextBlizzardPos = when (blizzard) {
-                        '>' -> nextBlizzardPos(row, col, Direction.RIGHT)
-                        '<' -> nextBlizzardPos(row, col, Direction.LEFT)
-                        '^' -> nextBlizzardPos(row, col, Direction.UP)
-                        'v' -> nextBlizzardPos(row, col, Direction.DOWN)
-                        else -> Pos(0,0)
-                    }
-                    valley[nextBlizzardPos.row][nextBlizzardPos.col].addBlizzard(blizzard)
+                valley[row][col].blizzardList.forEach { blizzardDirection ->
+                    val nextBlizzardPos = nextBlizzardPos(row, col, blizzardDirection)
+                    valley[nextBlizzardPos.row][nextBlizzardPos.col].addBlizzard(blizzardDirection)
                 }
             }
         }
@@ -78,17 +69,6 @@ class Valley(inputLines: List<String>) {
             }
         }
     }
-
-    private fun toDirection(blizzardChar: Char): Direction {
-        return when (blizzardChar) {
-            '>' -> Direction.RIGHT
-            '<' -> Direction.LEFT
-            '^' -> Direction.UP
-            'v' -> Direction.DOWN
-            else -> throw Exception("Unexpected Blizzard Char")
-        }
-    }
-
 
     private fun nextBlizzardPos(row: Int, col: Int, dir: Direction): Pos {
         val newRow = row + dir.dRow
@@ -114,48 +94,60 @@ class Valley(inputLines: List<String>) {
             println()
         }
     }
+}
 
-    inner class PositionInfo(inputChar: Char) {
-        val isWall = inputChar == '#'
-        val isGround = inputChar != '#'
+class PositionInfo(inputChar: Char) {
+    val isWall = inputChar == '#'
+    val isGround = inputChar != '#'
 
-        val blizzardList = listOfNotNull(if (inputChar in "<>^v") inputChar else null).toMutableList()
-        private val afterMoveBlizzardList = mutableListOf<Char>()
+    val blizzardList = listOfNotNull(if (inputChar in "<>^v") toDirection(inputChar) else null).toMutableList()
+    private val afterMoveBlizzardList = mutableListOf<Direction>()
 
-        fun addBlizzard(blizzardChar: Char) {
-            afterMoveBlizzardList.add(blizzardChar)
-        }
+    fun addBlizzard(blizzard: Direction) {
+        afterMoveBlizzardList.add(blizzard)
+    }
 
-        fun alignBlizzards() {
-            blizzardList.clear()
-            blizzardList.addAll(afterMoveBlizzardList)
-            afterMoveBlizzardList.clear()
-        }
+    fun alignBlizzards() {
+        blizzardList.clear()
+        blizzardList.addAll(afterMoveBlizzardList)
+        afterMoveBlizzardList.clear()
+    }
 
-        fun print() {
-            if (isWall) {
-                print('#')
-            } else if (blizzardList.isEmpty()) {
-                print('.')
-            } else if (blizzardList.size == 1) {
-                print(blizzardList.first())
-            } else {
-                print(blizzardList.size)
-            }
+    private fun toDirection(blizzardChar: Char): Direction {
+        return when (blizzardChar) {
+            '>' -> Direction.RIGHT
+            '<' -> Direction.LEFT
+            '^' -> Direction.UP
+            'v' -> Direction.DOWN
+            else -> throw Exception("Unexpected Blizzard Char")
         }
     }
 
+    fun print() {
+        if (isWall) {
+            print('#')
+        } else if (blizzardList.isEmpty()) {
+            print('.')
+        } else if (blizzardList.size == 1) {
+            print(blizzardList.first())
+        } else {
+            print(blizzardList.size)
+        }
+    }
 }
 
 
 class Pos(val row: Int, val col: Int) {
     override fun hashCode() = 1000* row + col
     override fun equals(other: Any?) = if (other is Pos) other.row == row && other.col == col else super.equals(other)
+    fun moveTo(dir: Direction) = Pos(row+dir.dRow, col+dir.dCol)
 }
 
-enum class Direction(val dRow: Int, val dCol: Int) {
-    RIGHT(0,1),
-    DOWN(1,0),
-    LEFT(0,-1),
-    UP(-1,0);
+enum class Direction(val dRow: Int, val dCol: Int, private val directionChar: Char) {
+    RIGHT(0,1, '>'),
+    DOWN(1,0, 'v'),
+    LEFT(0,-1, '<'),
+    UP(-1,0, '^');
+
+    override fun toString() = directionChar.toString()
 }
