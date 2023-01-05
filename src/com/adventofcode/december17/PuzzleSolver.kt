@@ -10,45 +10,52 @@ const val chamberWidth = 7
 const val leftEdgeRoom = 2
 const val bottomEdgeRoom = 3
 
-var countJetStreamTurns = 0L
-
-//val xxx = 1_000_000_000_000
-//val yyy = 1_514_285_714_288
-
 class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
     private val jetsStream = JetStream(input.inputLines[0])
     private val rockShapeList = RockShapeList()
 
     override fun resultPartOne(): String {
+        jetsStream.reset()
+        rockShapeList.reset()
         val rockPieces = mutableSetOf<Coordinate>()
 
-        repeat(5000) {
+        repeat(2022) {
             val rock = Rock(rockShape=rockShapeList.nextShape(), highestTop=(rockPieces.maxOfOrNull { it.y } ?: -1) + 1)
             rockRolling(rock, rockPieces)
             rockPieces.addAll(rock.coordinateList)
-
-            if (it % 5 == 4) { //5 gehad
-                println("${it+1} hoogte ${rockPieces.maxOf {  it.y } + 1}  jetStreamTurn $countJetStreamTurns")
-            }
         }
 
         return (rockPieces.maxOf {  it.y } + 1).toString()
     }
 
     override fun resultPartTwo(): String {
-        // Part two not programmed, but analysed with the help of excel.
-        // I run part one, and put output for each 5 rounds, and calculated the growth in heihjt for each of these 5 rounds.
-        // I found a pattern: after 35 rounds (example input), the change in heights was equal.
-        // I did the same for the real input, and - a liitle harder - could also found a pattern
-        //
-        // see excel file for more details
-        //
-        // It turned out that  think after a certain number of rounds, we have the same 'start' position, meaning:
-        // - same surface pattern,
-        // - same set of jetblows coming up and
-        // - same block is coming up
-        //
-        return "Solution via excel"
+        jetsStream.reset()
+        rockShapeList.reset()
+        val rockPieces = mutableSetOf<Coordinate>()
+        val stateList = mutableListOf<State>()
+
+        stateList.add(State(rockPieces, rockShapeList, jetsStream))
+        repeat(5000) {
+            val rock = Rock(rockShape=rockShapeList.nextShape(), highestTop=(rockPieces.maxOfOrNull { it.y } ?: -1) + 1)
+            rockRolling(rock, rockPieces)
+            rockPieces.addAll(rock.coordinateList)
+
+            val newState = State(rockPieces, rockShapeList, jetsStream)
+            val index = stateList.indexOfFirst { it == newState }
+            if (index >= 0) {
+                println("DAAR IS TIE!  $index --> ${stateList.size}  hoogte: ${newState.height - stateList[index].height}")
+
+                val cycleLength = (stateList.size - index)
+                val heightPerCycle = newState.height - stateList[index].height
+                val countRepeatingRounds = (1_000_000_000_000 - (index-1) ) / cycleLength
+                val initialRounds = 1_000_000_000_000 - countRepeatingRounds * cycleLength
+
+                val startHeight = stateList[initialRounds.toInt()].height
+                return (countRepeatingRounds * heightPerCycle + startHeight).toString()
+            }
+            stateList.add(newState)
+        }
+        return "NO ANSWER FOUND"
     }
 
     private fun rockRolling(rock: Rock, rockPieces: Set<Coordinate>) {
@@ -58,9 +65,26 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
             rock.pushByJet(jetsStream.nextDirection(), rockPieces)
         }
     }
+}
 
+//----------------------------------------------------------------------------------------------------------------------
 
+class State(rockPieces: Set<Coordinate>, rockShapeList: RockShapeList, jetStream: JetStream) {
+    private val firstColumnHeight = rockPieces.filter { it.x == 0 }.maxOfOrNull { it.y } ?: 0
+    private val topPattern = rockPieces.groupBy { v -> v.x }.map{it.value.maxOf { c -> c.y } - firstColumnHeight}
+    private val rockShapeIndex =  rockShapeList.currentIndex
+    private val jetStreamIndex = jetStream.currentIndex
+    val height = (rockPieces.maxOfOrNull { it.y } ?: -1) + 1
 
+    override fun equals(other: Any?): Boolean {
+        if (other !is State)
+            return super.equals(other)
+        return (rockShapeIndex == other.rockShapeIndex) && (jetStreamIndex == other.jetStreamIndex) && (topPattern == other.topPattern)
+    }
+
+    override fun hashCode(): Int {
+        return super.hashCode()
+    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -103,7 +127,6 @@ class Rock(rockShape: RockShape, highestTop: Int) {
     }
 
     fun pushByJet(dir: Direction, rockPieces: Set<Coordinate>) {
-        countJetStreamTurns++
         if (dir == Direction.LEFT) {
             if (canBePushedLeft(rockPieces)) {
                 coordinateList = coordinateList.map { c -> Coordinate(c.x - 1, c.y) }
@@ -124,7 +147,9 @@ class Rock(rockShape: RockShape, highestTop: Int) {
 //----------------------------------------------------------------------------------------------------------------------
 
 class JetStream(inputStr: String) {
-    private var currentIndex = 0
+    var currentIndex = 0
+        private set
+
     private val dirList = inputStr
         .map {if (it == '<') Direction.LEFT else Direction.RIGHT}
 
@@ -132,6 +157,10 @@ class JetStream(inputStr: String) {
         val oldIndex = currentIndex
         currentIndex = (currentIndex + 1) % dirList.size
         return dirList[oldIndex]
+    }
+
+    fun reset() {
+        currentIndex = 0
     }
 }
 
@@ -148,7 +177,8 @@ class RockShapeList {
         RockShape(listOf(Coordinate(0,0), Coordinate(1,0), Coordinate(0,-1), Coordinate(1,-1))),
     )
 
-    private var currentIndex = 0
+    var currentIndex = 0
+        private set
 
     fun nextShape(): RockShape {
         val oldIndex = currentIndex
@@ -156,6 +186,9 @@ class RockShapeList {
         return shapeList[oldIndex]
     }
 
+    fun reset() {
+        currentIndex = 0
+    }
 }
 
 data class RockShape(val coordinateList : List<Coordinate>) {
