@@ -3,7 +3,7 @@ package com.adventofcode.december17
 import com.adventofcode.PuzzleSolverAbstract
 
 fun main() {
-    PuzzleSolver(test=false).showResult()
+    PuzzleSolver(test=true).showResult()
 }
 
 const val chamberWidth = 7
@@ -47,8 +47,8 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
 
                 val cycleLength = (stateList.size - index)
                 val heightPerCycle = newState.height - stateList[index].height
-                val countRepeatingRounds = (1_000_000_000_000 - (index-1) ) / cycleLength
-                val initialRounds = 1_000_000_000_000 - countRepeatingRounds * cycleLength
+                val countRepeatingRounds = 1_000_000_000_000 / cycleLength
+                val initialRounds = 1_000_000_000_000 % cycleLength
 
                 val startHeight = stateList[initialRounds.toInt()].height
                 return (countRepeatingRounds * heightPerCycle + startHeight).toString()
