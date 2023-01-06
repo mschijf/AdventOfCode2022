@@ -1,9 +1,10 @@
 package com.adventofcode.december17
 
 import com.adventofcode.PuzzleSolverAbstract
+import java.text.DecimalFormat
 
 fun main() {
-    PuzzleSolver(test=true).showResult()
+    PuzzleSolver(test=false).showResult()
 }
 
 const val chamberWidth = 7
@@ -42,16 +43,23 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
 
             val newState = State(rockPieces, rockShapeList, jetsStream)
             val index = stateList.indexOfFirst { it == newState }
+//            println("${it+1} $newState")
             if (index >= 0) {
-                println("DAAR IS TIE!  $index --> ${stateList.size}  hoogte: ${newState.height - stateList[index].height}")
-
                 val cycleLength = (stateList.size - index)
                 val heightPerCycle = newState.height - stateList[index].height
-                val countRepeatingRounds = 1_000_000_000_000 / cycleLength
-                val initialRounds = 1_000_000_000_000 % cycleLength
-
+                val countRepeatingCycles = (1_000_000_000_000 - index) / cycleLength
+                val initialRounds = 1_000_000_000_000 - countRepeatingCycles * cycleLength
                 val startHeight = stateList[initialRounds.toInt()].height
-                return (countRepeatingRounds * heightPerCycle + startHeight).toString()
+
+                println("THERE IT IS!  $index --> ${stateList.size}")
+                println("   Cycle Length (in rounds)   : $cycleLength")
+                println("   Repeating Cycles           : " + DecimalFormat("#,###.##").format(countRepeatingCycles))
+                println("   Height per Cycle           : $heightPerCycle")
+                println("   Initial Rounds             : $initialRounds")
+                println("   Height after Initial Rounds: $startHeight")
+
+                return (countRepeatingCycles * heightPerCycle + startHeight).toString()
+
             }
             stateList.add(newState)
         }
@@ -70,8 +78,15 @@ class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {
 //----------------------------------------------------------------------------------------------------------------------
 
 class State(rockPieces: Set<Coordinate>, rockShapeList: RockShapeList, jetStream: JetStream) {
-    private val firstColumnHeight = rockPieces.filter { it.x == 0 }.maxOfOrNull { it.y } ?: 0
-    private val topPattern = rockPieces.groupBy { v -> v.x }.map{it.value.maxOf { c -> c.y } - firstColumnHeight}
+    private val topPattern = mutableListOf<Int>()
+    init {
+        val firstColumnHeight = rockPieces.filter { it.x == 0 }.maxOfOrNull { it.y } ?: 0
+        for (col in 1 until  chamberWidth) {
+            topPattern.add((rockPieces.filter { it.x == col }.maxOfOrNull { it.y } ?: 0) - firstColumnHeight)
+        }
+    }
+
+
     private val rockShapeIndex =  rockShapeList.currentIndex
     private val jetStreamIndex = jetStream.currentIndex
     val height = (rockPieces.maxOfOrNull { it.y } ?: -1) + 1
@@ -84,6 +99,10 @@ class State(rockPieces: Set<Coordinate>, rockShapeList: RockShapeList, jetStream
 
     override fun hashCode(): Int {
         return super.hashCode()
+    }
+
+    override fun toString(): String {
+        return "$topPattern Rock:$rockShapeIndex Jet:$jetStreamIndex"
     }
 }
 
