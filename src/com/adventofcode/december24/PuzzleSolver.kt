@@ -3,7 +3,7 @@ package com.adventofcode.december24
 import com.adventofcode.PuzzleSolverAbstract
 
 fun main() {
-    PuzzleSolver(test=false).showResult()
+    PuzzleSolver(test=true).showResult()
 }
 
 class PuzzleSolver(test: Boolean) : PuzzleSolverAbstract(test) {

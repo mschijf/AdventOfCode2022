@@ -30,7 +30,7 @@ abstract class PuzzleSolverAbstract (
     private fun getDayOfMonthFromSubClassName(): Int {
         val className = this.javaClass.name
         val monthName = "december"
-        val dayOfMonth = className.substringAfter(monthName).substringBeforeLast(".")
+        val dayOfMonth = className.substringAfter(monthName).substringBefore(".")
         return dayOfMonth.toInt()
     }
 }
